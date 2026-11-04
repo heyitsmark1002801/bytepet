@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Welcome to Bytepet</title>
+  <link rel="stylesheet" href="setup.css" />
+</head>
+<body>
+  <div class="drag-bar"></div>
+  <div class="dots" id="dots" aria-hidden="true"></div>
+
+  <main id="steps">
+    <!-- 1 · hello -->
+    <section class="step" data-step="hello">
+      <canvas class="egg" id="egg-hello"></canvas>
+      <h1 id="hello-title">Hi there!</h1>
+      <p class="lead">Bytepet is a tiny pet that lives on your screen.</p>
+      <ul class="facts">
+        <li><span>🍙</span> Finish tasks to feed it</li>
+        <li><span>🎯</span> Stay focused to keep it happy</li>
+        <li><span>😵</span> Too many distractions make it sad</li>
+      </ul>
+      <p class="hint">Let's get your egg ready. It takes about a minute.</p>
+    </section>
+
+    <!-- 2 · name -->
+    <section class="step" data-step="name" hidden>
+      <canvas class="egg" id="egg-name"></canvas>
+      <h1>What will you call it?</h1>
+      <input id="name" class="name-input" type="text" maxlength="20" placeholder="Byte" autocomplete="off" />
+      <p class="hint">You can rename it later in Settings.</p>
+    </section>
+
+    <!-- 3 · distractions -->
+    <section class="step" data-step="distractions" hidden>
+      <h1>What distracts you?</h1>
+      <p class="lead">Tick anything that pulls you away from work.</p>
+      <h2>Apps</h2>
+      <div class="checklist" id="apps"></div>
+      <h2>Websites</h2>
+      <div class="checklist" id="sites"></div>
+      <form class="add" id="add-distraction"><input type="text" placeholder="Add another app or website" /><button type="submit">Add</button></form>
+    </section>
+
+    <!-- 4 · work -->
+    <section class="step" data-step="work" hidden>
+      <h1>Where do you work?</h1>
+      <p class="lead">Time in these apps keeps your pet going, and shapes what it grows into.</p>
+      <div class="checklist" id="work"></div>
+      <form class="add" id="add-work"><input type="text" placeholder="Add another work app" /><button type="submit">Add</button></form>
+    </section>
+
+    <!-- 5 · permissions -->
+    <section class="step" data-step="permissions" hidden>
+      <h1>A few permissions</h1>
+      <p class="lead">macOS asks before an app can peek at other apps. Press <b>Test</b> on each one.
+        If you see ⚠️, press <b>Fix</b> and switch Bytepet on.</p>
+      <div class="perms" id="perms"></div>
+      <p class="hint">Everything stays on your Mac. Nothing is uploaded.</p>
+    </section>
+
+    <!-- 6 · rhythm -->
+    <section class="step" data-step="rhythm" hidden>
+      <h1>Your day</h1>
+      <div class="times">
+        <label>🌙 Bedtime <select id="bed"></select></label>
+        <label>☀️ Wake-up <select id="wake"></select></label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="t-checkin" /> <span><b>Morning check-in</b><small>Each morning, pick your 3 tasks for the day</small></span></label>
+        <label><input type="checkbox" id="t-bg" /> <span><b>Count open distractions</b><small>Not just the app in front: Steam or a YouTube tab open in the background counts too</small></span></label>
+        <label><input type="checkbox" id="t-strict" /> <span><b>Strict focus</b><small>During focus sessions, hide distracting apps and close distracting tabs</small></span></label>
+        <label><input type="checkbox" id="t-notify" /> <span><b>Notifications</b><small>When your pet needs you (never during the night)</small></span></label>
+      </div>
+    </section>
+
+    <!-- 7 · ready -->
+    <section class="step" data-step="ready" hidden>
+      <canvas class="egg" id="egg-ready"></canvas>
+      <h1 id="ready-title">Ready!</h1>
+      <p class="lead" id="ready-text"></p>
+      <p class="hint">Change any of this later in ⚙️ Settings.</p>
+    </section>
+  </main>
+
+  <footer>
+    <button id="back" class="ghost" type="button">Back</button>
+    <button id="next" class="primary" type="button">Let's start</button>
+  </footer>
+
+  <script src="sprites.js"></script>
+  <script src="setup.js"></script>
+</body>
+</html>

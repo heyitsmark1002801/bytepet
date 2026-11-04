@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+# keep .kiro/ committed: the hackathon needs it

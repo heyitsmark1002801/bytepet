@@ -1,0 +1,19 @@
+{
+  "name": "bytepet",
+  "productName": "Bytepet",
+  "version": "1.7.0",
+  "description": "A virtual pet that lives on your desktop and eats your productivity.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/pet-state.test.js",
+    "build:mac": "bash scripts/build-mac.sh",
+    "icon": "node scripts/sprite-dump.js | python3 scripts/make-icon.py"
+  },
+  "author": "Mark Sbitnev",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron/packager": "^18.3.6",
+    "electron": "^33.2.1"
+  }
+}

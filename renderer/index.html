@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Bytepet</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="fx"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="away-sign" hidden></div>
+  <img id="basket" alt="" hidden />
+  <div id="tip" hidden></div>
+
+  <div id="pet">
+    <div id="bubble"></div>
+    <div id="icons"></div>
+    <div id="focus-badge"></div>
+    <div id="revive-tag" hidden><div class="revive-bar"><i id="revive-fill"></i></div><span id="revive-text"></span></div>
+
+    <div id="panel">
+      <div class="panel-title"><span id="p-name">BYTE</span> <span id="p-stage"></span></div>
+      <div class="row"><span><img data-icon="food" alt="" />FOOD</span><div id="food-units" class="food-units"></div></div>
+      <div class="row"><span><img data-icon="heart" alt="" />JOY</span><div class="meter"><i id="b-happiness"></i></div></div>
+      <div class="row"><span><img data-icon="health" alt="" />HEALTH</span><div class="meter"><i id="b-health"></i></div></div>
+      <div class="row"><span><img data-icon="bolt" alt="" />ENERGY</span><div class="meter"><i id="b-energy"></i></div></div>
+      <div class="row"><span><img data-icon="medal" alt="" />DISCIPLINE</span><div class="meter"><i id="b-discipline"></i></div></div>
+      <div class="row ghost-row"><span>REVIVE</span><div class="meter"><i id="b-revive"></i></div></div>
+      <div class="panel-foot" id="p-foot"></div>
+      <div class="panel-needs" id="p-needs"></div>
+      <div class="panel-hint" id="p-hint">click pat · double-click play · drag toss · right-click menu</div>
+    </div>
+
+    <img id="umbrella" alt="" />
+    <canvas id="sprite"></canvas>
+    <div id="shadow"></div>
+  </div>
+
+  <script src="sprites.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+// Things the pet says. Edit freely.
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const LINES = {
+  hatched: ['*crack*... hi! I\'m {name}!', 'I\'m alive! Feed me work!'],
+  ate: ['Nom nom!', 'Delicious commit!', 'Yum, more please!', 'That hit the spot.'],
+  'ate-starving': ['FINALLY. Thank you!!', 'I was starving...', 'You saved me!'],
+  evolved: ['I\'m growing!!', 'Look at me now!', 'Level up!'],
+  'evolved-nightowl': ['I grew up a Night Owl! 🌙 Who needs sleep?'],
+  'evolved-coder': ['I\'m a Coder now! </> Ship it!'],
+  'evolved-writer': ['I became a Writer! ✍️ Every day a new page.'],
+  'evolved-artist': ['I\'m an Artist! 🎨 Everything is a canvas.'],
+  'evolved-zen': ['I grew into a Zen Master. ✨ Breathe in... breathe out.'],
+  'evolved-scholar': ['I\'m a Scholar! 🎓 Big tasks, big brain.'],
+  'evolved-gamer': ['I grew up a Gamer... 🎮 too much screen fun, maybe?'],
+  'evolved-grumpy': ['Hmph. I grew up... Grumpy. Too many care mistakes.'],
+  petted: ['Hehe!', '<3', 'More pats!', 'Purr...'],
+  'petted-too-much': ['Okay okay, go work!', 'Pats don\'t feed me...'],
+  basket: ['SWISH! 🏀', 'Nothing but net!', 'Two points! Again!', 'Basket! I\'m a pro!'],
+  'basket-tired': ['Swish... okay, I\'m dizzy now. Back to work?'],
+  meditating: ['Ommm... 🧘', 'Breathing with you. Focus.', 'Shh. We\'re in the zone.'],
+  'ghost-click': ['Ooooo... finish tasks or focus to bring me back. ({revive}%)', 'I\'m {revive}% back... keep working!'],
+  'good-morning': ['Good morning! ☀️ Slept like a log.', '*yawn* Morning! Ready for today?'],
+  'plan-ask': ['Good morning! ☀️ What are your 3 tasks today? Click me!', 'Morning! Let\'s plan the day — pick 3 tasks. Click me!'],
+  'plan-set': ['Got it! 3 tasks = 3 meals today 🍙', 'A plan! I love a plan.'],
+  'plan-done': ['ALL 3 DONE! Bonus treat! 🍰', 'Plan complete! You\'re amazing!'],
+  'lights-click': ['Click me to turn the lights off 💡'],
+  flies: ['Eww, flies! 🪰 Clean up or I\'ll get sick...', 'Bzzz... the mess is getting gross. Clean up?'],
+  'closed-distraction': ['Bye {source}! 👋 Back to work?', 'Closed {source}. Good choice!', 'Yay, no more {source}!'],
+  played: ['Wheee!', 'Again! Again!', 'Best day ever!'],
+  'too-tired': ['Too sleepy to play...'],
+  'fell-asleep': ['Zzz...'],
+  'woke-up': ['*yawn* Oh, you\'re back!', 'Refreshed! Let\'s go.'],
+  'screen-too-long': ['2 hours of screen... I\'m sleepy. Step away for 5 min, or click me for lights off 💡', 'Too much screen! Take a break, or click me to turn the lights off 💡'],
+  bedtime: ['It\'s bedtime 🌙 Click me to turn the lights off.', '*yawn* Bedtime! Click me or lock your screen 💡'],
+  'lights-off': ['Lights off... zzz', 'Ahh, darkness. Perfect. Goodnight!', 'Thanks! zzz'],
+  'petted-sleeping': ['zzz... *smiles in sleep*'],
+  'too-sleepy': ['Too sleepy... lights off first.'],
+  'got-sick': ['I caught a bug! Your Mac needs updates.', 'Achoo! Install updates = medicine.'],
+  cured: ['Medicine worked! Updates installed!', 'All patched up. I feel great!'],
+  'distraction-notice': ['Ooh, {source}? 👀', 'Wait... is that {source}?', '*peeks at {source}*'],
+  'distraction-warning': ['{minutes} minutes of {source}... just one more?', 'Hmm, still on {source}...', 'We were working, remember? 🥺'],
+  distracted: ['*sniff* Too much {source}...', 'I miss when we worked together... :(', '{source} again? I\'m sad now.'],
+  'distraction-reminder': [
+    'You\'ve been on {source} for {minutes} minutes...',
+    '{minutes} minutes of {source}. One small task first? 🥺',
+    'Still on {source}? I miss working with you.',
+    '{source} again... {minutes} min now. Back to it?',
+  ],
+  binge: ['{minutes} minutes of {source}... I\'m worried about us.', 'Still {source}? Take a real break instead?'],
+  strict: ['Nope! Hid {what} until we\'re done 😤', 'Strict focus! {what} can wait.', 'Saved {what} for later. Back to work!'],
+  tempted: ['{source} is open in the background... close it so we can focus?', 'I can feel {source} calling... ignore it!'],
+  'break-start': ['Break time! I\'ll watch with you 🍿', 'Guilt-free break! Enjoy 🍿'],
+  'break-end': ['Break\'s over! Back to it?', 'That was nice. Ready to work?'],
+  'break-early': ['Back already? Let\'s go!'],
+  refocused: ['Yay, back to work! Bye {source}!', 'There you are! Let\'s get it done.', 'Good choice. I feel better!'],
+  'focus-done': ['Verified focus session! +10 XP', '25 minutes of real focus. Proud of you!'],
+  'focus-failed': ['That session wasn\'t very focused... no XP.', 'Too much distraction during focus. Try again?'],
+  'missed-deadline': ['We missed a deadline... :(', 'Oh no, a task went overdue.'],
+  'task-done-S': ['Small task done! Snack time.', 'Quick win! Nom.'],
+  'task-done-M': ['Task done! Proper meal!', 'Nice work! Yum yum.'],
+  'task-done-L': ['BIG task done! FEAST!', 'You crushed it! Best meal ever!'],
+  'care-mistake': ['You ignored me... :(', 'That hurt my feelings.'],
+  birthday: ['Happy birthday to me! One year older!', 'A good day = a whole year! I\'m growing up.'],
+  pooped: ['Oops... it\'s getting messy in here.'],
+  flushed: ['*FLUSH* Ahh, so fresh and clean!', 'Squeaky clean! Thank you!'],
+  'mess-sick': ['All this mess made me sick... please clean up.'],
+  'mess-cured': ['Clean again! I feel so much better.'],
+  'battery-low': ['Battery low... so... sleepy...', 'Need... power... plug me in?'],
+  'plugged-in': ['Ahh, charging! ⚡', 'Power up!'],
+  hot: ['Phew! It\'s hot in here!', 'Your computer is cooking me!'],
+  'vacation-start': ['Bye! Off on vacation! 🧳'],
+  'vacation-end': ['I\'m home! I brought you something!', 'Back from my trip! Missed you!'],
+  dance: ['♪ I love this song!', '♪ Dance break!', '♪♪ Turn it up!'],
+  died: ['I... need... commits...', 'Everything is going dark...'],
+  revived: ['IT\'S ALIVE!! I\'m back!', 'Resurrected by the power of your work!'],
+  ghost: ['Ooooo... work to bring me back...', 'Commit something... I can feel it...'],
+  hungry: ['I\'m hungry... maybe commit something?', 'My tummy is rumbling...', 'Feed me productivity!'],
+  sad: ['I\'m lonely... pat me?', 'Feeling down today.'],
+  sick: ['I don\'t feel so good...', 'I need food and rest...'],
+  rain: ['It\'s raining in Vancouver. Shocking.', 'Umbrella mode!'],
+  snow: ['SNOW!!', 'Brr, it\'s snowing!'],
+  late: ['It\'s late. Sleep is a feature, not a bug.', 'Bedtime? Your brain needs a reboot.'],
+  meeting: ['Shh, meeting time. I\'ll be quiet.'],
+  app: {
+    Terminal: ['Debugging again?', 'Ooh, terminal magic.'],
+    iTerm2: ['Debugging again?', 'Hacker mode activated.'],
+    Code: ['Coding! My favourite food source.', 'Write good code, feed good pet.'],
+    'Visual Studio Code': ['Coding! My favourite food source.'],
+    Kiro: ['Kiro time! Let\'s build.', 'Spec it, build it, feed me.'],
+    Xcode: ['Xcode? Brave.'],
+    Preview: ['Studying? Smart.'],
+    Notes: ['Taking notes, nice.'],
+  },
+};
+
+function say(key, vars = {}) {
+  const arr = LINES[key];
+  if (!arr || !arr.length) return null;
+  return pick(arr).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+}
+
+function sayForApp(appName) {
+  const arr = LINES.app[appName];
+  return arr ? pick(arr) : null;
+}
+
+module.exports = { say, sayForApp, LINES };

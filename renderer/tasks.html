@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Bytepet</title>
+  <link rel="stylesheet" href="tasks.css" />
+</head>
+<body>
+  <nav id="tabs" role="tablist" aria-label="Bytepet">
+    <button role="tab" data-tab="tasks" aria-selected="true" title="Tasks" aria-label="Tasks">✅</button>
+    <button role="tab" data-tab="focus" title="Focus" aria-label="Focus">🎯</button>
+    <button role="tab" data-tab="pet" title="Pet" aria-label="Pet">🐣</button>
+    <button role="tab" data-tab="achievements" title="Badges" aria-label="Badges">🏆<span id="ach-count" class="pill"></span></button>
+    <button role="tab" data-tab="games" title="Games" aria-label="Games">🎮</button>
+    <button role="tab" data-tab="memories" title="Cemetery &amp; postcards" aria-label="Cemetery and postcards">🪦</button>
+    <button role="tab" data-tab="settings" title="Settings" aria-label="Settings">⚙️</button>
+  </nav>
+
+  <main data-panel="tasks">
+  <header>
+    <h1>✅ <span id="pet-name">Byte</span>'s food bowl</h1>
+    <p class="sub">Finish tasks to feed your pet: S = 1 🍙 · M = 2 🍙 · L = 3 🍙</p>
+  </header>
+
+  <section id="checkin" class="checkin" hidden></section>
+  <datalist id="open-titles"></datalist>
+
+  <section id="alerts" hidden></section>
+
+  <section id="focus-bar" hidden>
+    <div><strong>FOCUS</strong> <span id="focus-task"></span></div>
+    <div class="focus-right"><span id="focus-time">25:00</span> <button id="focus-stop" class="ghost-btn">Stop</button></div>
+  </section>
+
+  <form id="add">
+    <input id="title" type="text" maxlength="140" placeholder="What do you need to do?" autocomplete="off" required />
+    <div class="add-row">
+      <div class="sizes" role="radiogroup" aria-label="Task size">
+        <label><input type="radio" name="size" value="S" /><span>S<small>+1 food · 10xp</small></span></label>
+        <label><input type="radio" name="size" value="M" checked /><span>M<small>+2 food · 20xp</small></span></label>
+        <label><input type="radio" name="size" value="L" /><span>L<small>+3 food · 40xp</small></span></label>
+      </div>
+    </div>
+    <div class="add-row">
+      <label class="due">Due <input id="due" type="datetime-local" /></label>
+      <button type="submit" class="primary">Add task</button>
+    </div>
+    <p id="add-error" class="error" hidden></p>
+  </form>
+
+  <section>
+    <div class="list-head">
+      <h2>To do <span id="open-count" class="count"></span></h2>
+      <button id="clear-overdue" class="small-btn" hidden>Hide overdue</button>
+    </div>
+    <ul id="open-list" class="list"></ul>
+    <p id="empty" class="empty" hidden>Nothing to do. Add a task above, or import your GitHub issues.</p>
+  </section>
+
+  <section>
+    <h2>Done today <span id="done-summary" class="count"></span></h2>
+    <ul id="done-list" class="list done"></ul>
+  </section>
+
+  <details id="connections">
+    <summary>Connections <span class="count">Reminders · Todoist · calendar · GitHub</span></summary>
+
+    <p class="help tip">Tip: add <code>[S]</code>, <code>[M]</code> or <code>[L]</code> to a task's title in any app
+      to set its size. Otherwise high priority = L, low priority = S, everything else = M.</p>
+
+    <div class="conn">
+      <h3>Apple Reminders</h3>
+      <p class="help">Reads your reminders on this Mac. No account needed. macOS will ask to allow access the first time.</p>
+      <div class="conn-row">
+        <button id="rem-load" class="primary">Choose lists…</button>
+        <button id="rem-disconnect" class="ghost-btn" hidden>Disconnect</button>
+      </div>
+      <div id="rem-picker" hidden>
+        <div id="rem-lists" class="perm-list"></div>
+        <div class="conn-row"><button id="rem-save" class="primary">Sync these lists</button></div>
+      </div>
+      <p id="rem-status" class="status"></p>
+    </div>
+
+    <div class="conn">
+      <h3>Todoist</h3>
+      <p class="help">Todoist → Settings → Integrations → Developer → copy your <b>API token</b>.
+        It's stored encrypted in your macOS keychain.</p>
+      <div id="td-disconnected">
+        <input id="td-token" type="password" placeholder="Todoist API token" autocomplete="off" />
+        <div class="conn-row"><button id="td-connect" class="primary">Connect Todoist</button></div>
+      </div>
+      <div id="td-connected" hidden>
+        <div class="conn-row"><button id="td-disconnect" class="ghost-btn">Disconnect</button></div>
+      </div>
+      <p id="td-status" class="status"></p>
+    </div>
+
+    <label class="toggle"><input id="complete-in-source" type="checkbox" />
+      When I finish a task here, also tick it off in Reminders / Todoist</label>
+    <div class="conn-row"><button id="sync-now">Sync now</button></div>
+
+    <div class="conn">
+      <h3>Calendar</h3>
+      <p class="help">Paste your calendar's <b>secret iCal link</b>. Your pet will warn you before meetings
+        (and import tasks too, if your calendar app includes them in the link).
+        Google Calendar: Settings → your calendar → <i>Secret address in iCal format</i>.
+        Outlook: Settings → Shared calendars → Publish → ICS link.</p>
+      <textarea id="ics" rows="2" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"></textarea>
+      <div class="conn-row"><button id="save-ics" class="primary">Save calendar</button> <span id="cal-status" class="status"></span></div>
+    </div>
+
+    <div class="conn">
+      <h3>GitHub</h3>
+      <p class="help">Import issues assigned to you as tasks (labels like <code>size: S</code> set the size),
+        get alerts for pull requests waiting on your review, and closing an issue on GitHub completes the task here.
+        Create a <b>fine-grained token</b> with read-only access to Issues and Pull requests.
+        It's stored encrypted in your macOS keychain.</p>
+      <div id="gh-disconnected">
+        <input id="gh-token" type="password" placeholder="github_pat_..." autocomplete="off" />
+        <div class="conn-row"><button id="gh-connect" class="primary">Connect GitHub</button></div>
+      </div>
+      <div id="gh-connected" hidden>
+        <div class="conn-row">
+          <button id="gh-import" class="primary">Import my issues</button>
+          <button id="gh-disconnect" class="ghost-btn">Disconnect</button>
+        </div>
+      </div>
+      <p id="gh-status" class="status"></p>
+    </div>
+  </details>
+  </main>
+
+  <!-- FOCUS -->
+  <main data-panel="focus" hidden>
+    <h1>🎯 Focus</h1>
+
+    <div id="f-strict" class="focus-card"></div>
+
+    <div id="f-now" class="now-card"></div>
+    <div id="f-meters"></div>
+
+    <h2>🍿 Break</h2>
+    <div id="f-break" class="row-left"></div>
+
+    <h2>📊 Today</h2>
+    <div id="f-today"></div>
+    <div id="f-week" class="week"></div>
+    <div class="legend"><span class="sw work"></span> work <span class="sw dis"></span> distracted</div>
+
+    <details class="more">
+      <summary>🔧 Is detection working?</summary>
+      <div id="f-detect"></div>
+    </details>
+  </main>
+
+  <!-- PET -->
+  <main data-panel="pet" hidden>
+    <div class="pet-top">
+      <div class="pet-frame"><canvas id="pet-preview" class="pet-preview"></canvas></div>
+      <div class="pet-id">
+        <h1 id="pet-title"></h1>
+        <p id="pet-sub" class="sub"></p>
+        <div class="chips">
+          <span class="chip" title="One good day (2 tasks, or a task + a focus session) = one year"><b id="pet-age">0</b> 🎂</span>
+          <span class="chip" title="Good days in a row (best ever in brackets)"><b id="pet-streak">0</b> 🔥 <small id="pet-best"></small></span>
+          <span class="chip" title="Care mistakes: needs ignored for too long"><b id="pet-mistakes">0</b> 💔</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="pet-alert"></div>
+    <div id="pet-needs" class="needs-list"></div>
+    <div id="pet-meters" class="pet-meters"></div>
+
+    <h2>🌱 Growing up</h2>
+    <div id="growing"></div>
+
+    <h2>📖 Petdex <span id="dex-count" class="count"></span></h2>
+    <div id="petdex" class="petdex"></div>
+
+    <h2>🎀 Items</h2>
+    <div id="items" class="items"></div>
+
+    <div class="row-left pet-actions">
+      <button id="vacation-btn" title="Nothing decays while you're away, and your streak is safe"></button>
+      <button id="retire-btn" title="Adults can retire to the cemetery. A new egg hatches.">🌅 Retire…</button>
+    </div>
+  </main>
+
+  <!-- ACHIEVEMENTS -->
+  <main data-panel="achievements" hidden>
+    <h1>🏆 Badges</h1>
+    <p id="ach-summary" class="sub"></p>
+    <div class="progress"><i id="ach-bar"></i></div>
+    <div id="ach-grid" class="achs"></div>
+  </main>
+
+  <!-- GAMES -->
+  <main data-panel="games" hidden>
+    <h1>🎮 Games</h1>
+    <p class="sub">They play right on your desktop. Esc to quit.</p>
+    <div id="game-list" class="games"></div>
+  </main>
+
+  <!-- MEMORIES -->
+  <main data-panel="memories" hidden>
+    <h1>🪦 Cemetery</h1>
+    <p class="sub">Every pet you've raised. Rest well, little friends.</p>
+    <div id="graveyard" class="graveyard"></div>
+    <h1 class="spaced">💌 Postcards</h1>
+    <p class="sub">Souvenirs from your pet's vacations.</p>
+    <div id="postcards" class="postcards"></div>
+  </main>
+
+  <!-- SETTINGS -->
+  <main data-panel="settings" hidden>
+    <h1>⚙️ Settings</h1>
+    <form id="settings-form">
+      <label class="field">Pet name <input id="s-name" type="text" maxlength="20" /></label>
+
+      <h2>😵 Distractions</h2>
+      <div class="two-col">
+        <label class="field">Distracting apps <small>(one per line)</small><textarea id="s-apps" rows="5"></textarea></label>
+        <label class="field">Distracting websites <small>(one per line)</small><textarea id="s-sites" rows="5"></textarea></label>
+      </div>
+      <label class="toggle"><input id="s-bg" type="checkbox" /> <span>Count them even when they're just <b>open</b> in the background</span></label>
+      <label class="toggle"><input id="s-strict" type="checkbox" /> <span><b>Strict focus:</b> during focus sessions, hide distracting apps and close distracting tabs (saved for later)</span></label>
+
+      <h2>🔔 Notifications</h2>
+      <label class="toggle"><input id="s-notify" type="checkbox" /> <span>Mac notifications (when your pet needs you)</span></label>
+      <label class="toggle"><input id="s-toasts" type="checkbox" /> <span>Little pop-up cards on screen (badges, streaks, new items)</span></label>
+      <label class="toggle"><input id="s-quiet-pet" type="checkbox" /> <span>Quiet pet: speech bubbles only for important things</span></label>
+      <div class="three-col">
+        <label class="field">Quiet from <input id="s-q-start" type="number" min="0" max="23" title="Hour, 0–23" /></label>
+        <label class="field">Quiet until <input id="s-q-end" type="number" min="0" max="23" title="Hour, 0–23" /></label>
+        <label class="field">Max per day <input id="s-q-max" type="number" min="0" max="50" /></label>
+      </div>
+      <div class="row-left"><button type="button" id="s-test-notify">Send a test notification</button> <span id="s-notify-status" class="status"></span></div>
+
+      <h2>☀️ Daily rhythm</h2>
+      <label class="toggle"><input id="s-checkin" type="checkbox" /> <span>Morning check-in: my pet asks for my 3 tasks each day</span></label>
+      <div class="two-col">
+        <label class="field">Bedtime (hour, 0–23) <input id="s-bed" type="number" min="0" max="23" /></label>
+        <label class="field">Wake-up (hour, 0–23) <input id="s-wake" type="number" min="0" max="23" /></label>
+      </div>
+      <p class="help">At bedtime your pet asks for the lights off (click it, or lock your screen). It sleeps until wake-up.</p>
+
+      <h2>💻 App</h2>
+      <label class="toggle"><input id="s-login" type="checkbox" /> <span>Open Bytepet when I log in</span></label>
+      <p class="help" id="s-login-help"></p>
+
+      <details class="more">
+        <summary>More settings</summary>
+
+        <h3>Distraction details</h3>
+        <div class="two-col">
+          <label class="field">Sad after … minutes in a row <input id="s-after" type="number" min="1" max="120" /></label>
+          <label class="field">Daily allowance (minutes) <input id="s-allow" type="number" min="0" max="600" /></label>
+        </div>
+        <label class="field">Never distracting <small>(apps or sites you use for work)</small><textarea id="s-never" rows="2"></textarea></label>
+        <label class="field">Learning words <small>("PyTorch tutorial" on YouTube doesn't count)</small><textarea id="s-learning" rows="2"></textarea></label>
+        <label class="field">Window title keywords <small>(other browsers; needs Accessibility)</small><textarea id="s-keywords" rows="2"></textarea></label>
+        <div class="checks-row">
+          <span class="field-label">Also catch App Store categories:</span>
+          <label class="toggle"><input id="s-cat-game" type="checkbox" /> Games</label>
+          <label class="toggle"><input id="s-cat-ent" type="checkbox" /> Entertainment</label>
+          <label class="toggle"><input id="s-cat-social" type="checkbox" /> Social</label>
+        </div>
+        <label class="field">Hands-off watching counts for up to … minutes <input id="s-watch" type="number" min="5" max="480" /></label>
+
+        <h3>When distractions count</h3>
+        <label class="toggle"><input type="radio" name="s-mode" value="always" /> Always</label>
+        <label class="toggle"><input type="radio" name="s-mode" value="work" /> Only during work hours</label>
+        <div id="s-hours" class="work-hours">
+          <div class="days" id="s-days"></div>
+          <label class="field">From <input id="s-start" type="number" min="0" max="23" /></label>
+          <label class="field">To <input id="s-end" type="number" min="1" max="24" /></label>
+        </div>
+
+        <h3>Work &amp; screen time</h3>
+        <label class="field">Work apps <small>(feed your pet while you use them)</small><textarea id="s-work" rows="3"></textarea></label>
+        <label class="field">Screen time before lights off (minutes) <input id="s-screen" type="number" min="15" max="600" /></label>
+
+        <h3>💩 Digital mess</h3>
+        <label class="toggle"><input id="s-mess" type="checkbox" /> Poop when my computer gets messy</label>
+        <div class="four-col">
+          <label class="field">Desktop <input id="s-m-desktop" type="number" min="0" /></label>
+          <label class="field">Downloads <input id="s-m-downloads" type="number" min="0" /></label>
+          <label class="field">Tabs <input id="s-m-tabs" type="number" min="0" /></label>
+          <label class="field">Trash <input id="s-m-trash" type="number" min="0" /></label>
+        </div>
+
+        <h3>💌 Vacation postcards</h3>
+        <label class="toggle"><input id="s-location" type="checkbox" /> Guess which country I'm in (approximate, no GPS)</label>
+        <label class="field">A trip earns a postcard after … hours <input id="s-pc-hours" type="number" min="1" max="720" /></label>
+        <p class="help" id="s-perf"></p>
+      </details>
+
+      <div class="save-bar"><button type="submit" class="primary">Save settings</button> <span id="s-status" class="status"></span></div>
+    </form>
+
+    <h2>🛟 Help</h2>
+    <div class="row-left">
+      <button type="button" id="s-setup">Run setup again</button>
+      <button type="button" id="s-debug">Copy debug info</button>
+      <button type="button" id="s-log" class="ghost-btn">Open log file</button>
+      <span id="s-debug-status" class="status"></span>
+    </div>
+
+    <h2>🧨 Start over</h2>
+    <div class="danger">
+      <div>
+        <button type="button" id="s-reset-progress" class="danger-btn">Reset progress</button>
+        <p class="help">New egg; badges, streaks, Petdex, postcards and cemetery are cleared. Tasks and settings stay.</p>
+      </div>
+      <div>
+        <button type="button" id="s-reset-all" class="danger-btn">Erase everything</button>
+        <p class="help">Like a fresh install: also clears tasks, settings and connections.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="sprites.js"></script>
+  <script src="tasks.js"></script>
+  <script src="hub.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+:root {
+  --ink: #232a1f;
+  --paper: #f6f3e8;
+  --card: #fffdf6;
+  --line: #ddd6c1;
+  --soft: #6b6a5e;
+  --accent: #6d28d9;
+  --green: #15803d;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 13px/1.45 Menlo, Monaco, "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
+.drag-bar { height: 28px; -webkit-app-region: drag; flex: none; }
+[hidden] { display: none !important; }
+
+/* progress */
+.dots { display: flex; gap: 6px; justify-content: center; padding: 2px 0 6px; flex: none; }
+.dots i { width: 8px; height: 8px; background: var(--line); }
+.dots i.on { background: var(--ink); }
+.dots i.done { background: #9aa88a; }
+
+/* steps */
+main { flex: 1; overflow-y: auto; padding: 8px 40px 16px; }
+.step { animation: in .25s ease-out; }
+@keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.step[data-step="hello"], .step[data-step="name"], .step[data-step="ready"] { text-align: center; padding-top: 24px; }
+h1 { font-size: 22px; margin: 10px 0 6px; letter-spacing: .3px; }
+h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--soft); margin: 14px 0 6px; }
+.lead { margin: 0 0 8px; font-size: 13.5px; }
+.hint { color: var(--soft); font-size: 12px; margin-top: 18px; }
+.egg { image-rendering: pixelated; display: block; margin: 0 auto; }
+
+.facts { list-style: none; padding: 0; margin: 18px auto 0; display: inline-block; text-align: left; }
+.facts li { margin: 8px 0; font-size: 13.5px; }
+.facts span { display: inline-block; width: 30px; }
+
+.name-input {
+  display: block;
+  margin: 18px auto 0;
+  width: 260px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 18px;
+  text-align: center;
+  border: 3px solid var(--ink);
+  background: #fff;
+  outline: none;
+}
+.name-input:focus { box-shadow: 4px 4px 0 rgba(35, 42, 31, .25); }
+
+/* simple checklists */
+.checklist {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.checklist label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.checklist input { accent-color: var(--ink); width: 14px; height: 14px; margin: 0; flex: none; }
+.add { display: flex; gap: 8px; margin-top: 10px; }
+.add input { flex: 1; padding: 6px 9px; font: inherit; border: 1px solid var(--line); background: #fff; outline: none; }
+.add input:focus { border-color: var(--ink); }
+.add button { padding: 6px 12px; }
+
+/* permissions */
+.perms { background: var(--card); border: 1px solid var(--line); margin-top: 12px; }
+.perm { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.perm:last-child { border-bottom: none; }
+.perm .mark { width: 22px; text-align: center; font-size: 15px; }
+.perm .text { flex: 1; }
+.perm .text small { display: block; color: var(--soft); font-size: 11px; }
+.perm button { padding: 4px 10px; font-size: 11.5px; }
+
+/* rhythm */
+.times { display: flex; gap: 20px; margin: 14px 0 6px; }
+.times label { display: flex; flex-direction: column; gap: 4px; font-weight: 700; }
+.times select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); background: #fff; min-width: 120px; }
+.toggles { background: var(--card); border: 1px solid var(--line); margin-top: 14px; }
+.toggles label { display: flex; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.toggles label:last-child { border-bottom: none; }
+.toggles input { accent-color: var(--ink); width: 15px; height: 15px; margin-top: 2px; flex: none; }
+.toggles small { display: block; color: var(--soft); font-size: 11.5px; margin-top: 1px; }
+
+/* footer */
+footer {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 40px 22px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+button {
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  background: #fff;
+  border: 2px solid var(--ink);
+  padding: 8px 18px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(35, 42, 31, .2);
+}
+button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(35, 42, 31, .2); }
+button.primary { background: var(--ink); color: #f6f3e8; min-width: 150px; }
+button.primary:disabled { opacity: .4; cursor: default; }
+button.ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--soft); }
+button.ghost:hover { color: var(--ink); }

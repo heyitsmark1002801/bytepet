@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Bytepet Games</title>
+  <link rel="stylesheet" href="games.css" />
+</head>
+<body>
+  <div id="hud">
+    <span id="g-title"></span>
+    <span id="g-score"></span>
+    <span id="g-lives"></span>
+    <span id="g-best"></span>
+    <button id="quit" title="Quit (Esc)">✕ Quit <small>Esc</small></button>
+  </div>
+  <canvas id="stage"></canvas>
+  <div id="panel" hidden></div>
+  <div id="overlay" hidden>
+    <div class="card">
+      <h2 id="o-title"></h2>
+      <p id="o-text"></p>
+      <div class="row">
+        <button id="again" class="primary">Play again</button>
+        <button id="exit">Back to work</button>
+      </div>
+    </div>
+  </div>
+  <script src="sprites.js"></script>
+  <script src="games.js"></script>
+</body>
+</html>
