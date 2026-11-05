@@ -1,11 +1,39 @@
 # Bytepet 🥚
 
-A cute pixel-art virtual pet that lives on your Mac desktop and is cared for by your real habits.
-Finishing tasks feeds it, screen breaks put it to sleep, Mac updates are its medicine,
-distractions make it sad, and it tells you about meetings and deadlines.
-Neglect it and it becomes a ghost — then your work brings it back to life.
+> **A 90s-style virtual pet that lives on your Mac desktop and only eats when you get real work done.**
+
+<!-- DEMO GIF: drop a demo.gif here -->
+<!-- ![Bytepet demo](demo.gif) -->
 
 Built for the Kiro hackathon, **Resurrection** category: the 1990s LCD handheld pet, reborn as a desktop companion.
+
+## What it does
+
+- **Tasks = food.** Finish real work and your pet eats. Small task +1, medium +2, large +3; commits are snacks.
+- **Distractions = sadness.** Linger on YouTube, Netflix or Discord and it sulks, cries and loses discipline.
+- **Mac updates = medicine.** Pending system updates make it sick; installing them is the cure (+30 health).
+- **A messy Downloads = poop with flies.** Cluttered Desktop, Downloads, Trash or too many tabs make it poop. Leave the mess and 🪰 flies move in, then it gets sick.
+- **The ghost is revived by finishing work.** Neglect it and it dies into a ghost on your desktop. Finish tasks or a focus session within 3 days and your work brings it back to life.
+
+## Try it
+
+Grab the latest build from the [GitHub release](../../releases/latest):
+
+1. **Download** the `Bytepet-mac.zip` from the release and unzip it.
+2. **Drag** `Bytepet.app` into your **Applications** folder.
+3. The first launch, **right-click the app → Open** (it's not notarized, so a plain double-click is blocked by Gatekeeper). Confirm **Open** in the dialog. After that it opens normally.
+
+Your egg appears at the bottom-right of your screen and hatches a few seconds later. Prefer to run from source? See **Run it** below.
+
+## Built with Kiro
+
+Bytepet was designed and built with Kiro's spec-driven workflow:
+
+- **[Specs](.kiro/specs)** — requirements → design → tasks for each feature (`demo-mode`, `retro-sounds`, `sleep-health-decay`…).
+- **[Hooks](.kiro/hooks)** — automation that runs the tests on every `src/` save, keeps the README in sync with settings, and reviews new pet lines.
+- **[Steering](.kiro/steering)** — the product, tech and art guidance Kiro follows on every change.
+- **[Property-based tests](test/pet-state.test.js)** — [fast-check](https://github.com/dubzzz/fast-check) properties prove the care rules hold across random inputs (meters stay in 0–100, a sleeping pet can't die, cures always heal, and more), alongside [`test/demo-script.test.js`](test/demo-script.test.js) and [`test/sounds.test.js`](test/sounds.test.js). Run them with `npm test`.
+- **[KIRO_LOG.md](KIRO_LOG.md)** — the running log of how the project was built with Kiro.
 
 ## Run it
 
