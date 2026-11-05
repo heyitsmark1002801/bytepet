@@ -57,45 +57,45 @@ Each task is a small, test-backed step. Logic in `src/` ships with a test and `n
   - Run `npm test`.
   - _Requirements: 5.1, 5.4, 5.5, 6.1, 2.3_
 
-- [ ] 8. Floating pet window on Windows (multi-monitor + taskbar)
+- [x] 8. Floating pet window on Windows (multi-monitor + taskbar)
   - Keep the transparent/frameless/non-focusable/click-through options and `setIgnoreMouseEvents(true,{forward:true})`; add an explicit window `icon` (`.ico`) on Windows.
   - Generalise `createWindow`/`fit` to size the overlay to the `workArea` of the display the pet is on (not hardcoded primary) and re-fit on `display-metrics-changed`/`display-added`/`display-removed`; keep Mac on the primary display's `workArea`.
   - Verify on Windows: floor sits above the taskbar on bottom/top/left/right, and on a secondary monitor; renderer `floorY()` already follows `innerHeight`.
   - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
 
-- [ ] 9. Tray, notifications, and open-at-login on Windows
+- [x] 9. Tray, notifications, and open-at-login on Windows
   - Add `app.setAppUserModelId('com.bytepet.desktop')` early in `whenReady` (before any notification) so Windows toasts are attributed to Bytepet.
   - Ensure the tray uses a Windows `.ico` (keep the Mac `trayTemplate` + `setTemplateImage` branch); verify the right-click menu and the hub/setup windows render on Windows.
   - Branch `setOpenAtLogin`: `openAsHidden:true` on Mac, `args:['--hidden']` on Windows, and read `--hidden` at startup to start hidden; keep `app.getLoginItemSettings`/`setLoginItemSettings` cross-platform.
   - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6_
 
-- [ ] 10. Portability cleanup and Settings copy
+- [x] 10. Portability cleanup and Settings copy
   - Audit shared code for any remaining Mac-only shell call or hardcoded POSIX path; confirm all paths use `path.join`/`os.homedir()`.
   - Add a Windows-compatible git post-commit hook variant in `connectRepo` (replace the `#!/bin/sh`+`curl` POSIX hook with a Windows-friendly one when on Windows).
   - Add Settings copy (shown on Windows) explaining strict focus minimises the distracting window instead of closing/saving tabs.
   - Run `npm test`.
   - _Requirements: 5.4, 17.1, 17.2, 17.3, 17.5_
 
-- [ ] 11. Verify shared subsystems still pass on both platforms
+- [x] 11. Verify shared subsystems still pass on both platforms
   - Confirm the feed server, MCP server, demo mode, sounds, and save-file location are untouched and their existing tests (`feed-server`, `demo-script`, `sounds`, settings/setup sound tests) still pass.
   - Run the full `npm test` and confirm zero failures.
   - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 14.3_
 
-- [ ] 12. Windows packaging
+- [x] 12. Windows packaging
   - Add `electron-builder` as an exact-pinned devDependency and a `build` config with an NSIS `win` target, product name "Bytepet", and a `.ico` icon (generated from `assets/icon.png` or checked in).
   - Add `build:win` → `electron-builder --win --x64`; leave `build:mac` (`@electron/packager`) working; confirm `npm start` still runs source with no app build step.
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 14.1_
 
-- [ ] 13. CI release workflow
+- [x] 13. CI release workflow
   - Add `.github/workflows/release-win.yml`: trigger on release published + `workflow_dispatch`, `runs-on: windows-latest`, `actions/setup-node`, `npm ci`, `npm run build:win`, upload the `.exe` to the release; fail the job on build failure so no empty artifact is published.
   - _Requirements: 11.1, 11.2, 11.3, 11.4_
 
-- [ ] 14. README: Windows install, SmartScreen, and differences
+- [x] 14. README: Windows install, SmartScreen, and differences
   - Add Windows install steps (download/run the installer from the release; running/building from source on Windows) and a SmartScreen "More info → Run anyway" first-run step beside them; keep the macOS Gatekeeper steps unchanged.
   - Add a short "differences on Windows" list: browser distraction from window titles (not per-tab URLs), strict focus minimises instead of closing/saving tabs, updates via Windows Update, mess covers Desktop/Downloads/Recycle Bin.
   - Ensure the README doesn't contradict the no-build-step / pure-`src/` steering rules.
   - _Requirements: 13.1, 13.2, 13.3, 13.4, 19.1, 19.2, 19.3_
 
-- [ ] 15. Final full-suite verification
+- [x] 15. Final full-suite verification
   - Run `npm test` once more; confirm zero failures and that the Mac baseline pass count from task 1 is preserved or exceeded.
   - _Requirements: 2.6, 12.4, 14.3_

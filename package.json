@@ -8,13 +8,42 @@
     "start": "electron .",
     "test": "node test/pet-state.test.js && node test/demo-script.test.js && node test/tour.test.js && node test/sounds.test.js && node test/settings-sounds.test.js && node test/setup-sounds.test.js && node test/feed-server.test.js && node test/platform.test.js",
     "build:mac": "bash scripts/build-mac.sh",
+    "build:win": "electron-builder --win --x64",
     "icon": "node scripts/sprite-dump.js | python3 scripts/make-icon.py"
   },
   "author": "Mark Sbitnev",
   "license": "MIT",
+  "build": {
+    "appId": "com.bytepet.desktop",
+    "productName": "Bytepet",
+    "files": [
+      "main.js",
+      "preload*.js",
+      "src/**/*",
+      "renderer/**/*",
+      "assets/**/*",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Bytepet"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
   "devDependencies": {
     "@electron/packager": "^18.3.6",
     "electron": "^33.2.1",
+    "electron-builder": "26.0.12",
     "fast-check": "^4.10.2"
   }
 }

@@ -146,6 +146,11 @@
     $('t-checkin').checked = s.morningCheckin;
     $('t-bg').checked = s.countBackground;
     $('t-strict').checked = s.strictFocus;
+    // Windows minimises the distracting window instead of closing/saving tabs.
+    if (/Windows/i.test(navigator.userAgent)) {
+      const small = $('t-strict').closest('label').querySelector('small');
+      if (small) small.textContent = 'During focus sessions, hide distracting apps and minimise distracting windows';
+    }
     $('t-notify').checked = s.notifications;
     $('t-sounds').checked = s.sounds !== false;
     show(Number(new URLSearchParams(location.search).get('step')) || 0);

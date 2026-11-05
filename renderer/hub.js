@@ -3,6 +3,12 @@
   const api = window.tasksApi;
   const SP = window.Sprites;
   const $ = (id) => document.getElementById(id);
+  const IS_WIN = /Windows/i.test(navigator.userAgent);
+  // On Windows there are no per-tab URLs, so strict focus minimises the
+  // distracting window instead of closing and saving individual tabs.
+  const STRICT_TEXT = IS_WIN
+    ? '🔒 Strict: hide distracting apps and minimise distracting windows while focusing'
+    : '🔒 Strict: hide distracting apps and close distracting tabs while focusing';
   let hub = null;
   let lastKey = '';
   let settingsFilled = false;
@@ -326,7 +332,7 @@
         box.checked = f.strict;
         box.addEventListener('change', () => api.setStrict(box.checked));
         return box;
-      })(), h('span', {}, '🔒 Strict: hide distracting apps and close distracting tabs while focusing')),
+      })(), h('span', {}, STRICT_TEXT)),
       saved.length ? h('div', { class: 'saved' },
         h('div', { class: 'now-head' }, `🔖 Saved for later (${saved.length})`),
         ...saved.slice(0, 10).map((t) => h('div', { class: 'bg-row' },
@@ -424,6 +430,10 @@
     $('s-end').value = sch.end;
     $('s-pc-hours').value = s.postcardAfterHours;
     $('s-strict').checked = s.strictFocus;
+    if (IS_WIN) {
+      const span = $('s-strict').closest('label').querySelector('span');
+      if (span) span.innerHTML = '<b>Strict focus:</b> during focus sessions, hide distracting apps and minimise distracting windows';
+    }
     $('s-notify').checked = s.notifications;
     $('s-toasts').checked = s.toasts;
     $('s-sounds').checked = s.sounds !== false;

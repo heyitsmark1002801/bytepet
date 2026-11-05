@@ -17,13 +17,23 @@ Built for the Kiro hackathon, **Resurrection** category: the 1990s LCD handheld 
 
 ## Try it
 
-Grab the latest build from the [GitHub release](../../releases/latest):
+Bytepet runs on **macOS** and **Windows**. Grab the latest build from the [GitHub release](../../releases/latest).
+
+### macOS
 
 1. **Download** the `Bytepet-mac.zip` from the release and unzip it.
 2. **Drag** `Bytepet.app` into your **Applications** folder.
 3. The first launch, **right-click the app → Open**, then confirm **Open** in the dialog (it's not notarized, so a plain double-click is blocked by Gatekeeper). On newer macOS (Sequoia and later) the dialog may not offer an Open button — instead go to **System Settings → Privacy & Security**, scroll down to the "Bytepet was blocked" message and click **Open Anyway**, then launch it again. After this one-time step it opens normally.
 
+### Windows
+
+1. **Download** the `Bytepet-Setup-*.exe` installer from the release and run it.
+2. Windows **SmartScreen** may warn that it's from an unknown publisher (the installer isn't code-signed). Click **More info → Run anyway** to continue. This is the one-time Windows equivalent of the macOS Gatekeeper step above.
+3. Follow the installer, then launch **Bytepet** from the Start menu.
+
 Your egg appears at the bottom-right of your screen and hatches a few seconds later. Prefer to run from source? See **Run it** below.
+
+A few things work differently on Windows — see **[Differences on Windows](#differences-on-windows)** below.
 
 ## How I used Kiro
 
@@ -126,6 +136,43 @@ for permissions as **Bytepet** instead of Terminal. Drag it into **Applications*
 (first time: right-click → **Open**). Then Settings → App → **Open Bytepet when I log in**.
 Your pet, tasks and badges carry over — `npm start` and the app share the same save files.
 You'll need to allow the permissions once more for the app (setup screen → Test → Fix).
+
+### Build the Windows installer (Bytepet-Setup.exe)
+
+On a Windows PC with **Node.js** and **Git** installed:
+
+```bash
+npm install
+npm run build:win
+```
+
+This runs [electron-builder](https://www.electron.build) and produces an NSIS installer (`Bytepet-Setup-*.exe`)
+in `dist/`. There's **no build step for the app itself** — `npm start` still runs the plain source, and
+electron-builder only packages the installer. Running Bytepet from source on Windows is the same as on macOS:
+`npm install` then `npm start`. The official Windows installer on the [releases page](../../releases/latest)
+is built automatically on a Windows runner by the [GitHub Actions workflow](.github/workflows/release-win.yml).
+
+## Differences on Windows
+
+Bytepet does the same things on Windows as on macOS, but a few checks work differently because Windows has no
+AppleScript and a different system model:
+
+- **Browser distraction is read from window titles, not per-tab URLs.** Windows can't hand an app the URL of each
+  tab, so Bytepet matches the browser's **window title** against your distracting-sites list and keywords. The
+  learning exemption (titles with "tutorial", "lecture"…) still applies.
+- **Strict focus minimises the distracting window** instead of closing and saving individual tabs. There's no
+  "Saved for later / Reopen tabs" list on Windows.
+- **Updates are checked via Windows Update** (not `softwareupdate`/Homebrew). If the check ever fails, Bytepet
+  treats it as "no updates" so your pet is never wrongly made sick.
+- **Digital mess** covers your **Desktop**, **Downloads** and the **Recycle Bin** (the browser-tabs pile is
+  macOS-only).
+- **Battery:** the pet reacts to being on battery vs charging. The extra "under 20%" low-battery reaction is
+  macOS-only (Windows doesn't expose a percentage without extra permissions).
+- **Permissions:** Windows doesn't need the macOS Automation/Accessibility prompts for these reads, so there's
+  nothing to approve in the setup screen.
+
+Everything else — tasks, focus sessions, mini-games, achievements, postcards, the tray menu, notifications,
+commits feeding the pet, and your save files — works the same on both platforms.
 
 ## Food & XP
 
@@ -433,14 +480,15 @@ see **Kiro can feed your pet** above.
 
 ## Privacy
 
-Everything stays on your Mac. Bytepet reads the frontmost app's name, the current browser
-site's domain, whether music is playing, and the list of pending updates. Network requests:
-weather (Open-Meteo), your calendar link, and GitHub — only if you connect them.
+Everything stays on your device (Mac or Windows). Bytepet reads the frontmost app's name, the current browser
+site's domain (or window title on Windows), whether music is playing, and the list of pending updates. Network
+requests: weather (Open-Meteo), your calendar link, and GitHub — only if you connect them.
 
 ## Troubleshooting
 
 - **Reporting a bug** → Settings → **Copy debug info** (or menu bar → Help) and paste it in. Tokens and
-  calendar links are hidden. The log file is at `~/Library/Application Support/Bytepet/logs/bytepet.log`.
+  calendar links are hidden. The log file is at `~/Library/Application Support/Bytepet/logs/bytepet.log` on macOS,
+  or `%APPDATA%\Bytepet\logs\bytepet.log` on Windows.
 
 - **No notifications** → System Settings → Notifications → *Electron* → allow.
 - **Websites, Spotify or Reminders not detected** → System Settings → Privacy & Security → Automation →
@@ -467,7 +515,8 @@ src/achievements.js  the 50 achievements (tested)
 src/postcards.js     vacation postcards for 50+ countries (tested)
 src/location.js      where you are while on vacation (tested)
 src/distraction.js   what counts as a distraction (tested)
-src/system.js        mess, battery, heat, window titles; hide apps & close tabs (strict focus)
+src/platform/         OS reads behind one contract: index.js (picker), mac.js, win.js, neutral.js
+src/system.js        compatibility shim re-exporting the macOS platform layer
 src/quiet.js         quiet hours and the daily notification limit (tested)
 scripts/build-mac.sh builds Bytepet.app (npm run build:mac)
 scripts/make-icon.py draws the app icon (npm run icon)

@@ -324,9 +324,19 @@ function turnLightsOff() {
 }
 
 // ---------- pet window ----------
+// The display the pet currently lives on (the one under the window, or primary).
+// workArea excludes the taskbar/dock on both platforms, so sizing the overlay to
+// it keeps the pet's floor above the taskbar wherever the taskbar sits.
+function petDisplay() {
+  if (win && !win.isDestroyed()) {
+    try { return screen.getDisplayMatching(win.getBounds()); } catch { /* fall through */ }
+  }
+  return screen.getPrimaryDisplay();
+}
+
 function createWindow() {
   const { x, y, width, height } = screen.getPrimaryDisplay().workArea;
-  win = new BrowserWindow({
+  const opts = {
     x, y, width, height,
     transparent: true,
     frame: false,
@@ -345,16 +355,21 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
-  });
+  };
+  // Windows needs an explicit window icon (macOS takes it from the app bundle).
+  if (IS_WIN) opts.icon = path.join(__dirname, 'assets', 'icon.png');
+  win = new BrowserWindow(opts);
   win.setAlwaysOnTop(true, 'floating');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   win.setIgnoreMouseEvents(true, { forward: true });
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
-  if (settings.hidden) win.hide();
+  // --hidden: Windows open-at-login starts us hidden (macOS uses openAsHidden instead).
+  if (settings.hidden || process.argv.includes('--hidden')) win.hide();
 
   const fit = () => {
     if (!win || win.isDestroyed()) return;
-    win.setBounds(screen.getPrimaryDisplay().workArea);
+    // Track the display the pet is on; its workArea follows taskbar moves/auto-hide.
+    win.setBounds(petDisplay().workArea);
   };
   screen.on('display-metrics-changed', fit);
   screen.on('display-added', fit);
@@ -2064,7 +2079,11 @@ function openAtLoginState() {
 }
 function setOpenAtLogin(on) {
   if (!app.isPackaged) return;
-  try { app.setLoginItemSettings({ openAtLogin: on, openAsHidden: true }); } catch (e) { logLine(`login item failed: ${e}`); }
+  try {
+    // macOS has openAsHidden; Windows starts hidden via a launch flag we read at startup.
+    const extra = IS_WIN ? { args: ['--hidden'] } : { openAsHidden: true };
+    app.setLoginItemSettings({ openAtLogin: on, ...extra });
+  } catch (e) { logLine(`login item failed: ${e}`); }
 }
 
 // Settings edited in the hub: validate everything
@@ -2406,7 +2425,7 @@ function buildMenuTemplate() {
       type: 'checkbox',
       enabled: app.isPackaged,
       checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
-      click: (i) => app.setLoginItemSettings({ openAtLogin: i.checked }),
+      click: (i) => setOpenAtLogin(i.checked),
     },
     demoMode ? { label: '⏹ Stop demo (playing…)', click: stopDemo } : { label: '▶ Play demo', click: startDemo },
     {
@@ -2664,6 +2683,9 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', () => openTasksWindow());
   app.whenReady().then(async () => {
+    // Windows attributes toast notifications to this AppUserModelID (otherwise
+    // they show up as "Electron"). Harmless on macOS.
+    try { app.setAppUserModelId('com.bytepet.desktop'); } catch { /* not supported */ }
     if (IS_MAC && app.dock) app.dock.hide();
     freshStartIfNeeded();
     loadSettings();
