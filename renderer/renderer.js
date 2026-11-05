@@ -1,6 +1,7 @@
 // Bytepet — what you see: movement, physics, pixel animation, bubbles, icons.
 const api = window.bytepet;
 const SP = window.Sprites;
+const Sound = window.Sounds;
 const $ = (id) => document.getElementById(id);
 const petEl = $('pet');
 const canvas = $('sprite');
@@ -256,6 +257,7 @@ function burst(icons, n = 10) {
 // ---------- events from main ----------
 api.onEvent((ev) => {
   const t = ev.type;
+  Sound.handleEvent(ev.type, S); // retro beep (gated on snapshot/sounds/quiet); fires for call-hungry & got-sick too
   if (t === 'ate' || t === 'ate-starving') {
     const size = ev.source && ev.source.startsWith('task-') ? ev.source.slice(5) : null;
     const units = { S: 1, M: 2, L: 3 }[size];

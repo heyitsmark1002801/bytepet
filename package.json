@@ -6,7 +6,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node test/pet-state.test.js && node test/demo-script.test.js",
+    "test": "node test/pet-state.test.js && node test/demo-script.test.js && node test/sounds.test.js && node test/settings-sounds.test.js && node test/setup-sounds.test.js",
     "build:mac": "bash scripts/build-mac.sh",
     "icon": "node scripts/sprite-dump.js | python3 scripts/make-icon.py"
   },

@@ -113,6 +113,7 @@ const DEFAULT_SETTINGS = {
   checkHomebrew: false,
   notifications: true, // Mac notifications
   toasts: true, // little pop-up cards on screen (badges, streaks…)
+  sounds: true, // little retro beeps when your pet needs you
   morningCheckin: true, // each morning, the pet asks for your 3 tasks for today
   calendarIcsUrls: [], // attention: secret iCal links from Google / Outlook / iCloud
   meetingReminderMinutes: 10,
@@ -370,6 +371,7 @@ function snapshot(p = pet) {
     music,
     updates: { count: updates.count, checking: updates.checking },
     quiet: settings.quiet || inMeeting,
+    sounds: settings.sounds !== false,
     focus: focus ? { remainingMs: Math.max(0, focus.endsAt - Date.now()), total: focus.total } : null,
     app: currentApp,
     system: systemView(),
@@ -2082,6 +2084,7 @@ function hubView() {
       strictFocus: settings.strictFocus !== false,
       notifications: settings.notifications !== false,
       toasts: settings.toasts !== false,
+      sounds: settings.sounds !== false,
       morningCheckin: settings.morningCheckin !== false,
       bedtimeHour: settings.bedtimeHour ?? 23,
       wakeHour: settings.wakeHour ?? 7,
@@ -2153,6 +2156,7 @@ function saveHubSettings(input = {}) {
   if ('strictFocus' in input) settings.strictFocus = !!input.strictFocus;
   if ('notifications' in input) settings.notifications = !!input.notifications;
   if ('toasts' in input) settings.toasts = !!input.toasts;
+  if ('sounds' in input) settings.sounds = !!input.sounds;
   if ('morningCheckin' in input) settings.morningCheckin = !!input.morningCheckin;
   if ('bedtimeHour' in input) settings.bedtimeHour = num(input.bedtimeHour, 0, 23, 23);
   if ('wakeHour' in input) settings.wakeHour = num(input.wakeHour, 0, 23, 7);

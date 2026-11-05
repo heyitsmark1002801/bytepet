@@ -120,6 +120,7 @@
       countBackground: $('t-bg').checked,
       strictFocus: $('t-strict').checked,
       notifications: $('t-notify').checked,
+      sounds: $('t-sounds').checked,
     });
   });
   $('name').addEventListener('keydown', (e) => { if (e.key === 'Enter') show(at + 1); });
@@ -146,6 +147,7 @@
     $('t-bg').checked = s.countBackground;
     $('t-strict').checked = s.strictFocus;
     $('t-notify').checked = s.notifications;
+    $('t-sounds').checked = s.sounds !== false;
     show(Number(new URLSearchParams(location.search).get('step')) || 0);
   });
 })();
