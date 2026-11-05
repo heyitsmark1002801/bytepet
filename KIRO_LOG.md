@@ -69,14 +69,15 @@ art or overall design was changed — only real bugs and documentation.
   the steering files, feature specs, the bugfix spec, the hooks, the `pet-writer` agent and
   the MCP server. `.gitignore` covers `node_modules`, `dist`, `.DS_Store` and `*.log`.
 
-### Needs a human eye
+### Resolved
 
 - **`first-run-tour` spec vs. what shipped.** The shipped tour is a Hub/Tasks-window
   spotlight walkthrough (`src/tour.js`, `renderer/tour.js`, "Replay the tour" button,
   `test/tour.test.js` passing, offered after setup via the `offer-tour` IPC). The
-  `first-run-tour` spec's tasks describe a *different* design (a pet-window pointer-bubble
-  overlay with `tourSeen` on the profile and tour copy in `lines.js`), so its `tasks.md`
-  boxes are all still unchecked — and they genuinely don't match the shipped design. I left
-  them unchecked rather than tick boxes for work that was never done as written. Decide
-  whether to update that spec to describe the shipped Hub tour, or leave it as a record of
-  the original plan.
+  `first-run-tour` spec's tasks originally described a *different* design (a pet-window
+  pointer-bubble overlay with `tourSeen` on the profile and tour copy in `lines.js`).
+  Resolution: the feature is fully built and tested, just under the Hub-spotlight design, so
+  rather than rip out working code to match an outdated plan, its `tasks.md` was rewritten to
+  describe the shipped design and its boxes ticked against that. The `tasks.md` header and the
+  Notes section record the divergence (no `profile.tourSeen`, no `lines.js` tour keys — those
+  were never part of the shipped design).
