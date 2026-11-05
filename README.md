@@ -29,11 +29,46 @@ Your egg appears at the bottom-right of your screen and hatches a few seconds la
 
 Bytepet was designed and built with Kiro's spec-driven workflow:
 
-- **[Specs](.kiro/specs)** — requirements → design → tasks for each feature (`demo-mode`, `retro-sounds`, `sleep-health-decay`…).
-- **[Hooks](.kiro/hooks)** — automation that runs the tests on every `src/` save, keeps the README in sync with settings, and reviews new pet lines.
+- **[Specs](.kiro/specs)** — requirements → design → tasks for each feature (`demo-mode`, `retro-sounds`, `sleep-health-decay`, `kiro-feeds-pet`…).
+- **[Hooks](.kiro/hooks)** — automation that runs the tests on every `src/` save, keeps the README in sync with settings, reviews new pet lines, and feeds the pet when the test suite passes.
+- **[MCP server](mcp/server.js)** — Kiro can watch your pet and reward real work through an on-device Model Context Protocol server (see **Kiro can feed your pet** below).
 - **[Steering](.kiro/steering)** — the product, tech and art guidance Kiro follows on every change.
 - **[Property-based tests](test/pet-state.test.js)** — [fast-check](https://github.com/dubzzz/fast-check) properties prove the care rules hold across random inputs (meters stay in 0–100, a sleeping pet can't die, cures always heal, and more), alongside [`test/demo-script.test.js`](test/demo-script.test.js) and [`test/sounds.test.js`](test/sounds.test.js). Run them with `npm test`.
 - **[KIRO_LOG.md](KIRO_LOG.md)** — the running log of how the project was built with Kiro.
+
+### Kiro can feed your pet 🍙
+
+Bytepet ships a small [MCP server](mcp/server.js) so Kiro (or any Model Context Protocol
+client) can see how your pet is doing and reward real work. It's a thin, on-device client
+over the same local feed server git commits use — no dependencies, nothing leaves your Mac,
+and every tool fails with a clear message if the app isn't running.
+
+Three tools:
+
+| Tool | What it does |
+|---|---|
+| `get_pet_status` | Mood, stage, food, needs and open-task count (read-only) |
+| `list_open_tasks` | Your open tasks, with ids, so Kiro can pick one |
+| `complete_task` | Mark a task done by id — feeds the pet, just like finishing it in the app |
+
+Register it once in `.kiro/settings/mcp.json` (the read-only tools are auto-approved;
+`complete_task` changes state, so it stays a manual approval):
+
+```json
+{
+  "mcpServers": {
+    "bytepet": {
+      "command": "node",
+      "args": ["mcp/server.js"],
+      "disabled": false,
+      "autoApprove": ["get_pet_status", "list_open_tasks"]
+    }
+  }
+}
+```
+
+A Kiro hook, [`feed-pet-on-green-tests`](.kiro/hooks/feed-pet-on-green-tests.json), also
+runs `npm test` after each turn and feeds your pet a medium snack whenever the suite passes.
 
 ## Run it
 
@@ -361,7 +396,11 @@ Bytepet listens on your Mac only (`127.0.0.1:47777`):
 curl "http://127.0.0.1:47777/feed?type=task&size=L"   # reward a large task
 curl "http://127.0.0.1:47777/feed?type=commit"
 curl "http://127.0.0.1:47777/status"
+curl "http://127.0.0.1:47777/tasks"                   # list open tasks (id, title, size, due)
+curl "http://127.0.0.1:47777/task/done?id=<id>"       # finish a task by id (feeds the pet)
 ```
+
+The same endpoints power the [Kiro MCP server](mcp/server.js) — see **Kiro can feed your pet** above.
 
 ## Privacy
 

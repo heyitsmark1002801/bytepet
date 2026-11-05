@@ -1971,6 +1971,20 @@ function startFeedServer() {
         openTasks: T.openTasks(tasks).length, alerts: alerts.map((a) => a.text),
       }));
     }
+    if (u.pathname === '/tasks') {
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify(T.openTasks(tasks).map((t) => ({
+        id: t.id, title: t.title, size: t.size, due: t.due, source: t.source,
+      }))));
+    }
+    if (u.pathname === '/task/done') {
+      const id = u.searchParams.get('id');
+      if (!id) { res.statusCode = 400; return res.end('missing id\n'); }
+      const t = completeTask(id);
+      res.setHeader('Content-Type', 'application/json');
+      if (!t) { res.statusCode = 404; return res.end(JSON.stringify({ ok: false, error: 'no open task with that id' })); }
+      return res.end(JSON.stringify({ ok: true, id: t.id, title: t.title, size: t.size }));
+    }
     res.statusCode = 404;
     res.end('not found\n');
   });

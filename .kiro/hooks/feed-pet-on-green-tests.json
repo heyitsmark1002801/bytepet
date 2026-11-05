@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Feed the pet when tests pass",
+      "trigger": "Stop",
+      "description": "After each agent turn, runs npm test; if it passes, feeds the pet a medium snack via the local feed server. Silent no-op if tests fail or the app isn't running.",
+      "action": {
+        "type": "command",
+        "command": "npm test --silent >/dev/null 2>&1 && curl -s -m 2 \"http://127.0.0.1:47777/feed?type=task&size=M\" >/dev/null 2>&1 || true",
+        "timeout": 120
+      }
+    }
+  ]
+}

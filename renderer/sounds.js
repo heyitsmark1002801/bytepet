@@ -22,14 +22,20 @@
   };
 
   // Pure: the beep spec for an event, or null if the event has none (R2.1-2.6, 2.8).
+  // Own-property check so inherited keys (toString, constructor, …) are not
+  // mistaken for real specs.
+  function hasSpec(type) {
+    return Object.prototype.hasOwnProperty.call(SPECS, type);
+  }
+
   function specFor(type) {
-    return SPECS[type] || null;
+    return hasSpec(type) ? SPECS[type] : null;
   }
 
   // Pure: is this event one we sound, and are we allowed to play right now?
   // `state` is the latest snapshot S (may be null before the first snapshot).
   function shouldPlay(type, state) {
-    if (!SPECS[type]) return false; // R2.8: unmapped event -> no beep
+    if (!hasSpec(type)) return false; // R2.8: unmapped event -> no beep
     if (!state) return false; // R4.4: no snapshot yet -> no beep
     if (state.sounds === false) return false; // R3.5: sounds off -> no beep
     if (state.quiet) return false; // R4.1: quiet -> no beep, overrides sounds
