@@ -69,15 +69,23 @@ async function checkMess(limits) {
   return piles;
 }
 
-// Battery: { percent, charging, onBattery } or null on desktops
-async function battery() {
+// Battery: { percent, pluggedIn, charging, onBattery } or null on desktops.
+// Charging/plugged state comes from Electron powerMonitor (cross-platform truth);
+// the percent and "is charging vs just plugged" nuance still come from pmset.
+async function battery(powerMonitor) {
   if (!IS_MAC) return null;
   const r = await run('/usr/bin/pmset', ['-g', 'batt'], 4000);
   if (r.err) return null;
   const m = r.out.match(/(\d+)%/);
-  if (!m) return null;
-  const pluggedIn = /AC Power/i.test(r.out);
-  return { percent: Number(m[1]), pluggedIn, charging: /;\s*charging/i.test(r.out), onBattery: !pluggedIn };
+  if (!m) return null; // no battery line: a desktop → treated as plugged in by the caller
+  const onBatteryPm = powerMonitor && typeof powerMonitor.onBatteryPower === 'boolean' ? powerMonitor.onBatteryPower : null;
+  const pluggedIn = onBatteryPm != null ? !onBatteryPm : /AC Power/i.test(r.out);
+  return {
+    percent: Number(m[1]),
+    pluggedIn,
+    charging: pluggedIn && /;\s*charging/i.test(r.out),
+    onBattery: !pluggedIn,
+  };
 }
 
 // Heat: 'nominal' | 'fair' | 'serious' | 'critical' from macOS, plus CPU load

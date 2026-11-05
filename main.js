@@ -60,6 +60,9 @@ process.on('unhandledRejection', (e) => logLine(`[rejection] ${e && e.stack ? e.
 
 const FEED_PORT = 47777;
 const IS_MAC = process.platform === 'darwin';
+const IS_WIN = process.platform === 'win32';
+// Platforms where Bytepet reads the real system (foreground app, mess, updates…).
+const IS_SUPPORTED = IS_MAC || IS_WIN;
 
 // ---------- files ----------
 const dataDir = () => app.getPath('userData');
@@ -743,8 +746,9 @@ async function classify() {
   const tab = BROWSERS[appName] ? await getBrowserTab(appName) : null;
   const site = tab && tab.site;
   let title = tab && tab.title;
-  // Browsers we can't read a URL from (Firefox…), or ones that said no: look at the window title
-  if (!title && (matches(appName, settings.titleCheckApps) || (BROWSERS[appName] && !site))) {
+  // Browsers we can't read a URL from (Firefox…), or ones that said no: look at the window title.
+  // On Windows there are no per-tab URLs, so the foreground window title is always used.
+  if (!title && (IS_WIN || matches(appName, settings.titleCheckApps) || (BROWSERS[appName] && !site))) {
     title = await System.frontWindowTitle();
     accessibilityOk = title != null;
   }
@@ -792,12 +796,17 @@ async function scanBackground(cfg, skip) {
   }
   const tabsTtl = focus ? 0 : onBatteryNow() ? 30000 : 4000;
   if (now - bgCache.tabsAt > tabsTtl || !bgCache.tabs) {
-    const tabs = [];
-    for (const a of apps) {
-      const kind = BROWSER_KIND[a.name];
-      if (!kind || (browserDenied[a.name] || 0) > Date.now()) continue;
-      const list = await System.allTabs(a.name, kind);
-      if (list) { tabs.push(...list); browserStatus[a.name] = 'ok'; }
+    let tabs = [];
+    if (IS_WIN) {
+      // Windows has no per-tab URLs: match browser window titles instead.
+      tabs = (await System.browserTabs()) || [];
+    } else {
+      for (const a of apps) {
+        const kind = BROWSER_KIND[a.name];
+        if (!kind || (browserDenied[a.name] || 0) > Date.now()) continue;
+        const list = await System.allTabs(a.name, kind);
+        if (list) { tabs.push(...list); browserStatus[a.name] = 'ok'; }
+      }
     }
     bgCache.tabs = tabs;
     bgCache.tabsAt = now;
@@ -847,7 +856,7 @@ const friendly = (src) => String(src || 'that').replace(/\.(com|tv|net|org)$/, '
 
 async function sample() {
   if (demoMode) return;
-  if (sampling15 || !IS_MAC) return;
+  if (sampling15 || !IS_SUPPORTED) return;
   sampleTurn += 1;
   // on battery (or if checks are slow), look every 10 s instead of every 5 s — except during focus
   const slow = onBatteryNow() || perf.lastMs > 3000 || perf.cpu > 15;
@@ -1021,16 +1030,22 @@ let lastStrictLine = 0;
 async function enforceStrict(c) {
   const hosts = (settings.distractionSites || []).filter((d) => !(settings.neverDistracting || []).includes(d));
   const acted = [];
-  const browsers = new Set();
+  // browser name -> a target the platform can act on (bundlePath/exe if known)
+  const browsers = new Map();
   if (c.frontDistracting) {
-    if (BROWSER_KIND[c.appName]) browsers.add(c.appName);
+    if (BROWSER_KIND[c.appName]) browsers.set(c.appName, c.bundlePath);
     else if (await System.hideApp(c.bundlePath)) acted.push(c.appName);
   }
   for (const hit of c.background || []) {
-    if (hit.browser) browsers.add(hit.browser);
+    if (hit.browser) { if (!browsers.has(hit.browser)) browsers.set(hit.browser, hit.bundlePath || null); }
     else if (hit.bundlePath && await System.hideApp(hit.bundlePath)) acted.push(hit.source);
   }
-  for (const b of browsers) {
+  for (const [b, target] of browsers) {
+    if (IS_WIN) {
+      // Windows can't close a specific tab: minimise the browser window instead.
+      if (await System.hideApp(target || b)) acted.push(b);
+      continue;
+    }
     const closed = await System.closeTabs(b, BROWSER_KIND[b], hosts, settings.learningKeywords);
     if (closed.length) {
       profile.savedTabs = profile.savedTabs || [];
@@ -1440,7 +1455,7 @@ function wakeIfBack() {
 // ---------- digital mess → poop ----------
 async function checkMessNow() {
   if (demoMode) return;
-  if (!IS_MAC || !settings.checkMess) { if ((pet.poop || []).length) applyMess([]); return; }
+  if (!IS_SUPPORTED || !settings.checkMess) { if ((pet.poop || []).length) applyMess([]); return; }
   applyMess(await System.checkMess({ ...DEFAULT_SETTINGS.messLimits, ...(settings.messLimits || {}) }));
 }
 function applyMess(piles) {
@@ -1476,7 +1491,7 @@ function systemView() {
 }
 async function checkSystem() {
   if (demoMode) return;
-  system = { battery: await System.battery(), heat: System.heat(powerMonitor) };
+  system = { battery: await System.battery(powerMonitor), heat: System.heat(powerMonitor) };
   const v = systemView();
   const key = `${v.low}|${v.pluggedIn}|${v.hot}`;
   if (lastSystemKey && key !== lastSystemKey && !pet.vacation && pet.stage !== 'egg' && !pet.ghost) {
@@ -2711,6 +2726,6 @@ if (!app.requestSingleInstanceLock()) {
     setInterval(sampleTrip, 60 * 60 * 1000);
     setTimeout(sampleTrip, 30000);
   });
-  app.on('before-quit', () => { savePet(); saveTasks(); saveProfile(); });
+  app.on('before-quit', () => { savePet(); saveTasks(); saveProfile(); if (Platform.stopHost) Platform.stopHost(); });
   app.on('window-all-closed', () => { /* keep running in the menu bar */ });
 }
