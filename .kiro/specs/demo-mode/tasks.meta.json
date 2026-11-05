@@ -1,0 +1,437 @@
+{
+  "pbtResults": {
+    "1.2 Write property test: story plays eight steps in order": {
+      "status": "passed",
+      "lastRunTimestamp": 1793836064818
+    },
+    "1.4 Write property test: the demo ends with a living pet": {
+      "status": "passed",
+      "lastRunTimestamp": 1793836224177
+    },
+    "1.5 Write property test: captions are non-empty and within the length bound": {
+      "status": "passed",
+      "lastRunTimestamp": 1793836259312
+    },
+    "1.6 Write property test: total runtime lands in the required window": {
+      "status": "passed",
+      "lastRunTimestamp": 1793836306798
+    },
+    "1.7 Write property test: advancing the demo pet never mutates the real pet": {
+      "status": "passed",
+      "lastRunTimestamp": 1793836483561
+    }
+  },
+  "executionHistory": {
+    "1.1 Implement `src/demo-script.js` with the eight-step story and helpers": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901338
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835907902
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835998187
+      }
+    ],
+    "1.2 Write property test: story plays eight steps in order": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901379
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836001933
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836077809
+      }
+    ],
+    "1.3 Write property test: each step establishes its intended effect": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901410
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836002841
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836181978
+      }
+    ],
+    "1.4 Write property test: the demo ends with a living pet": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901438
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836003783
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836232860
+      }
+    ],
+    "1.5 Write property test: captions are non-empty and within the length bound": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901468
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836005192
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836267622
+      }
+    ],
+    "1.6 Write property test: total runtime lands in the required window": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901507
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836005871
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836316246
+      }
+    ],
+    "1.7 Write property test: advancing the demo pet never mutates the real pet": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901538
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836318868
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836492596
+      }
+    ],
+    "1.8 Write unit tests for caption wording": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901569
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836495225
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836653483
+      }
+    ],
+    "2. Checkpoint - demo-script module and its tests pass": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901595
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836822861
+      }
+    ],
+    "3.1 Add demo module-level state and refactor `snapshot()` to accept a pet": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901625
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836826936
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836948779
+      }
+    ],
+    "3.2 Implement `pushDemoState()`": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901651
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836954353
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837013884
+      }
+    ],
+    "4.1 Gate `pushState()` and `notify()` while a demo is playing": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901678
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837017429
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837064232
+      }
+    ],
+    "4.2 Gate background timer callbacks and power-event handlers": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901707
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837067003
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837258995
+      }
+    ],
+    "4.3 Write example test asserting notification suppression gate": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901736
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837264520
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837402346
+      }
+    ],
+    "5.1 Implement `startDemo()`, `runDemoStep()`, and `stopDemo()`": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901766
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837263036
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837403647
+      }
+    ],
+    "5.2 Add the tray toggle entry in `buildMenuTemplate()`": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901795
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837407911
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837453835
+      }
+    ],
+    "6.1 Expose `onDemoCaption` in preload.js": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901824
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836827834
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836947818
+      }
+    ],
+    "6.2 Add the `#demo-caption` element and its styling": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901854
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836828857
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836946876
+      }
+    ],
+    "6.3 Handle demo captions in renderer.js": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901886
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836953711
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837013021
+      }
+    ],
+    "6.4 Write/ document caption-render check": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901915
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837265026
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837404269
+      }
+    ],
+    "7.1 Confirm end-to-end wiring": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901949
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837457206
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837532963
+      }
+    ],
+    "7.2 Checkpoint - ensure all tests pass": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793835901977
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837536039
+      },
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837551347
+      }
+    ],
+    "1. Create the pure demo-script module": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793836653546
+      }
+    ],
+    "3. Add demo state and snapshot refactor in main.js": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837013919
+      }
+    ],
+    "4. Isolate the demo from real data and background activity": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837402387
+      }
+    ],
+    "6. Add the demo-caption IPC and renderer plumbing": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837404315
+      }
+    ],
+    "5. Implement the demo step engine in main.js": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837453871
+      }
+    ],
+    "7. Final checkpoint - wire everything together and verify": [
+      {
+        "executionId": "f9502153-fd93-41eb-89b5-f45cadea37a7",
+        "chatSessionId": "sess_355cf08c-845e-4433-8a5f-9087e0f305d2",
+        "timestamp": 1793837551379
+      }
+    ]
+  }
+}

@@ -26,6 +26,7 @@ const Postcards = require('./src/postcards');
 const Location = require('./src/location');
 const Dist = require('./src/distraction');
 const Quiet = require('./src/quiet');
+const Demo = require('./src/demo-script');
 const { say, sayForApp } = require('./src/lines');
 
 // ---------- log file (for bug reports) ----------
@@ -275,6 +276,11 @@ let locked = false;
 let music = false;
 let weather = null;
 let focus = null; // { endsAt, total, taskId, samples, onTask }
+// ---------- demo mode (throwaway pet for presentations; never persisted) ----------
+let demoMode = false;
+let demoPet = null;
+let demoTimer = null;
+let demoStepIndex = 0;
 let lastAppComment = null;
 let lastNeedComment = 0;
 const lastNotified = {};
@@ -353,12 +359,12 @@ function send(channel, payload) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
 }
 
-function snapshot() {
+function snapshot(p = pet) {
   return {
-    pet,
-    mood: P.mood(pet),
-    needs: P.needs(pet),
-    foodUnits: P.foodUnits(pet),
+    pet: p,
+    mood: P.mood(p),
+    needs: P.needs(p),
+    foodUnits: P.foodUnits(p),
     alerts: alerts.slice(0, 3).map((a) => ({ kind: a.kind, text: a.text })),
     weather,
     music,
@@ -374,14 +380,75 @@ function snapshot() {
     noticing: !!(lastSample && lastSample.distracting) && !onBreak(),
     wakeHour: settings.wakeHour ?? 7,
     graves: (profile.desktopGraves || []).map((g) => ({ id: String(g.died), name: g.name })),
-    ghostDaysLeft: pet.ghost && pet.ghostSince ? Math.max(0, Math.ceil((pet.ghostSince + 3 * 24 * 3600e3 - Date.now()) / (24 * 3600e3))) : null,
+    ghostDaysLeft: p.ghost && p.ghostSince ? Math.max(0, Math.ceil((p.ghostSince + 3 * 24 * 3600e3 - Date.now()) / (24 * 3600e3))) : null,
   };
 }
 
 function pushState({ menu = true } = {}) {
+  if (demoMode) return;
   send('state', snapshot());
   if (menu) updateTray();
   sendTasksWindow();
+}
+
+// Push the demo pet's state on the same 'state' channel, overriding the
+// real-world-derived fields so the renderer draws a clean demo stage.
+function pushDemoState() {
+  const s = snapshot(demoPet);
+  send('state', {
+    ...s,
+    alerts: [],
+    weather: null,
+    updates: { count: 0, checking: false },
+    equipped: {},
+    graves: [],
+  });
+}
+
+// Start the scripted demo on a throwaway pet. No-op if a demo is already playing
+// so we never stack two step loops on top of each other.
+function startDemo() {
+  if (demoMode) return;
+  demoMode = true;
+  demoPet = Demo.createDemoPet(P);
+  demoStepIndex = 0;
+  updateTray(); // flip the tray entry to the stop label
+  runDemoStep();
+}
+
+// Advance the demo one step: apply the mutation, show its caption, redraw the
+// demo pet, then re-arm a single timer for the next step. Ends naturally once
+// the last step has played.
+function runDemoStep() {
+  if (demoStepIndex >= Demo.DEMO_STEPS.length) {
+    stopDemo();
+    return;
+  }
+  const step = Demo.DEMO_STEPS[demoStepIndex];
+  Demo.applyStep(demoPet, step, P);
+  send('demo-caption', step.caption);
+  pushDemoState();
+  // The die step drops the gravestone in the renderer the same way handleEvents
+  // would, but without firing any notification.
+  if (step.id === 'die') send('event', { type: 'died' });
+  demoStepIndex += 1;
+  demoTimer = setTimeout(runDemoStep, step.holdMs);
+}
+
+// End the demo and restore the real pet's display. Idempotent and also the
+// natural-end path. demoMode is cleared before pushState()/updateTray() so the
+// real pet redraws and the tray entry flips back to the play label.
+function stopDemo() {
+  if (demoTimer) {
+    clearTimeout(demoTimer);
+    demoTimer = null;
+  }
+  demoMode = false;
+  demoPet = null;
+  demoStepIndex = 0;
+  send('demo-caption', ''); // hide the caption strip
+  pushState(); // redraw the real pet unchanged
+  updateTray();
 }
 
 // ---------- notifications ----------
@@ -398,6 +465,7 @@ let notifyDay = '';
 let notifyCount = 0;
 const inQuietHours = (d = new Date()) => Quiet.inQuietHours(d.getHours(), settings.quietStart ?? 23, settings.quietEnd ?? 8);
 function notify(title, body, onClick, { force = false } = {}) {
+  if (demoMode) return;
   try {
     if (!settings.notifications || !Notification.isSupported()) return;
     const today = new Date().toDateString();
@@ -588,6 +656,7 @@ async function applyRemote(source, remote, statusFn) {
 }
 
 async function syncSource(source) {
+  if (demoMode) return;
   const src = SOURCES[source];
   if (!src || !src.enabled() || syncing[source]) return null;
   syncing[source] = true;
@@ -829,6 +898,7 @@ const onBreak = () => !!breakUntil && Date.now() < breakUntil;
 const friendly = (src) => String(src || 'that').replace(/\.(com|tv|net|org)$/, '');
 
 async function sample() {
+  if (demoMode) return;
   if (sampling15 || !IS_MAC) return;
   sampleTurn += 1;
   // on battery (or if checks are slow), look every 10 s instead of every 5 s — except during focus
@@ -1083,6 +1153,7 @@ function endBreak(early = false) {
 
 // ---------- music: dance when Spotify / Music is playing ----------
 async function checkMusic() {
+  if (demoMode) return;
   if (!IS_MAC) return;
   let playing = false;
   for (const name of settings.musicApps || []) {
@@ -1116,6 +1187,7 @@ async function countBrewUpdates() {
 }
 
 async function checkUpdates(manual = false) {
+  if (demoMode) return;
   if (!IS_MAC || updates.checking) return;
   if (!settings.checkUpdates && !manual) return;
   updates.checking = true;
@@ -1163,6 +1235,7 @@ async function quickUpdateCount() {
   return Number.isFinite(n) ? n : null;
 }
 async function medicineTick() {
+  if (demoMode) return;
   if (!IS_MAC || !pet.needsMedicine || updates.checking) return;
   const now = Date.now();
   const watching = now < medicineWatchUntil;
@@ -1243,6 +1316,7 @@ function openSafeUrl(url) {
 }
 
 async function refreshCalendar() {
+  if (demoMode) return;
   const urls = (settings.calendarIcsUrls || []).map((u) => String(u).trim()).filter(Boolean);
   if (!urls.length) { calendarEvents = []; calendarStatus = ''; return; }
   const now = Date.now();
@@ -1280,6 +1354,7 @@ async function refreshCalendar() {
 }
 
 async function refreshGithub() {
+  if (demoMode) return;
   const token = getGithubToken();
   if (!token) { githubReviews = []; githubStatus = ''; return; }
   try {
@@ -1323,6 +1398,7 @@ async function importGithubIssues() {
 }
 
 async function checkRepos() {
+  if (demoMode) return;
   for (const repo of settings.repos || []) {
     const { err, out } = await run('git', ['-C', repo, 'status', '--porcelain'], { timeout: 10000 });
     if (err) continue;
@@ -1334,6 +1410,7 @@ async function checkRepos() {
 
 // ---------- the main clock: once a minute ----------
 async function minuteTick() {
+  if (demoMode) return;
   // The last minute of 15-second samples decides (a quick peek at YouTube is fine)
   if (!samples.length || !IS_MAC) await sample();
   const minute = samples.length ? samples.slice() : [lastSample].filter(Boolean);
@@ -1403,6 +1480,7 @@ async function minuteTick() {
 }
 
 function fastTick() {
+  if (demoMode) return;
   wakeIfBack();
   if (pet.stage === 'egg' && !pet.ghost && Date.now() - pet.born > 20000) {
     pet.xp = Math.max(pet.xp, P.STAGES[1].minXp);
@@ -1414,18 +1492,21 @@ function fastTick() {
 
 // ---------- lights: lock screen / sleep ----------
 function onAway() {
+  if (demoMode) return;
   locked = true;
   handleEvents(P.lightsOff(pet, { night: isNight(), wakeAt: nextWakeAt() }));
   savePet();
   pushState();
 }
 function onBack() {
+  if (demoMode) return;
   locked = false;
   wakeIfBack();
   pushState();
 }
 // Wake up right away when you come back (not at the next minute tick)
 function wakeIfBack() {
+  if (demoMode) return;
   if (!pet.asleep) return;
   const back = !locked && powerMonitor.getSystemIdleTime() < 10;
   const kind = P.shouldWake(pet, back);
@@ -1438,6 +1519,7 @@ function wakeIfBack() {
 
 // ---------- digital mess → poop ----------
 async function checkMessNow() {
+  if (demoMode) return;
   if (!IS_MAC || !settings.checkMess) { if ((pet.poop || []).length) applyMess([]); return; }
   applyMess(await System.checkMess({ ...DEFAULT_SETTINGS.messLimits, ...(settings.messLimits || {}) }));
 }
@@ -1474,6 +1556,7 @@ function systemView() {
   };
 }
 async function checkSystem() {
+  if (demoMode) return;
   system = { battery: await System.battery(), heat: System.heat(powerMonitor) };
   const v = systemView();
   const key = `${v.low}|${v.pluggedIn}|${v.hot}`;
@@ -1851,6 +1934,7 @@ function weatherKind(code) {
   return 'clear';
 }
 async function updateWeather() {
+  if (demoMode) return;
   const w = settings.weather || {};
   if (!w.enabled) { weather = null; return; }
   try {
@@ -2355,6 +2439,7 @@ function buildMenuTemplate() {
       checked: app.isPackaged && app.getLoginItemSettings().openAtLogin,
       click: (i) => app.setLoginItemSettings({ openAtLogin: i.checked }),
     },
+    demoMode ? { label: '⏹ Stop demo (playing…)', click: stopDemo } : { label: '▶ Play demo', click: startDemo },
     {
       label: 'Demo tools',
       submenu: [

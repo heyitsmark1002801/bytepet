@@ -834,6 +834,18 @@ api.onReset(() => {
   body.x = -1;
 });
 
+// ---------- demo mode caption ----------
+api.onDemoCaption((text) => {
+  const el = $('demo-caption');
+  if (text) {
+    el.textContent = text; // replace any previous caption — only one shows at a time
+    el.hidden = false;
+  } else {
+    el.textContent = '';
+    el.hidden = true;
+  }
+});
+
 let last = now();
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000);

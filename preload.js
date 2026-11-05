@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld('bytepet', {
   messClick: (kind) => ipcRenderer.send('mess-click', kind),
   graveClick: (id) => ipcRenderer.send('grave-click', id),
   onReset: (cb) => ipcRenderer.on('reset', () => cb()),
+  onDemoCaption: (cb) => ipcRenderer.on('demo-caption', (_e, text) => cb(text)),
 });
