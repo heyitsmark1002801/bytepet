@@ -244,6 +244,10 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 #demo-caption[hidden] { display: none; }
 
+/* draggable sprites must not trigger the browser's native image drag,
+   or it swallows mousemove/mouseup and the throw loses its velocity */
+.poop, .fly, .grave img, #basket { -webkit-user-drag: none; user-select: none; }
+
 /* ---------- poop ---------- */
 .poop {
   position: fixed;

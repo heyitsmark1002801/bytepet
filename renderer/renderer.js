@@ -549,6 +549,10 @@ function updatePoop(s) {
       el.className = 'poop';
       el.src = SP.icon('poop', 3);
       el.title = `${info.label}: ${info.count} (limit ${info.limit})`;
+      // stop the browser's native image drag — it would swallow mousemove/mouseup
+      // and kill the throw. (The pet is a <canvas>, so it never had this problem.)
+      el.draggable = false;
+      el.addEventListener('dragstart', (e) => e.preventDefault());
       const spot = Math.max(8, Math.min(window.innerWidth - 40, body.x - 36 - poops.size * 34));
       p = { el, x: spot, y: window.innerHeight - POOP_SIZE - 2, vx: 0, vy: 0, mode: 'rest', info };
       el.style.left = `${p.x}px`;
@@ -636,6 +640,8 @@ window.addEventListener('mousedown', (e) => {
   const kind = overPoop(e.clientX, e.clientY);
   if (!kind) return;
   const p = poops.get(kind);
+  // prevent the native image drag so we keep getting mousemove/mouseup
+  e.preventDefault();
   // you can catch it mid-air and swing it again, just like grabbing the pet
   p.vx = 0; p.vy = 0;
   poopPress = { kind, sx: e.clientX, sy: e.clientY, ox: e.clientX - p.x, oy: e.clientY - p.y, moved: false, samples: [{ x: e.clientX, y: e.clientY, t: now() }] };
