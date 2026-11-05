@@ -9,7 +9,8 @@
       "action": {
         "type": "agent",
         "prompt": "If any settings were added or changed, update the Settings section in README.md to match."
-      }
+      },
+      "enabled": true
     }
   ]
 }

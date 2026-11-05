@@ -1,6 +1,6 @@
 // Things the pet says. Edit freely.
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
+ 
 const LINES = {
   hatched: ['*crack*... hi! I\'m {name}!', 'I\'m alive! Feed me work!'],
   ate: ['Nom nom!', 'Delicious commit!', 'Yum, more please!', 'That hit the spot.'],
@@ -66,10 +66,10 @@ const LINES = {
   flushed: ['*FLUSH* Ahh, so fresh and clean!', 'Squeaky clean! Thank you!'],
   'mess-sick': ['All this mess made me sick... please clean up.'],
   'mess-cured': ['Clean again! I feel so much better.'],
-  'battery-low': ['Battery low... so... sleepy...', 'Need... power... plug me in?'],
+  'battery-low': ['Battery low.... so... sleepy...', 'Need... power... plug me in?'],
   'plugged-in': ['Ahh, charging! ⚡', 'Power up!'],
   hot: ['Phew! It\'s hot in here!', 'Your computer is cooking me!'],
-  'vacation-start': ['Bye! Off on vacation! 🧳'],
+  'vacation-start': ['Bye! Off on vacation!! 🧳'],
   'vacation-end': ['I\'m home! I brought you something!', 'Back from my trip! Missed you!'],
   dance: ['♪ I love this song!', '♪ Dance break!', '♪♪ Turn it up!'],
   died: ['I... need... commits...', 'Everything is going dark...'],
@@ -77,7 +77,7 @@ const LINES = {
   ghost: ['Ooooo... work to bring me back...', 'Commit something... I can feel it...'],
   hungry: ['I\'m hungry... maybe commit something?', 'My tummy is rumbling...', 'Feed me productivity!'],
   sad: ['I\'m lonely... pat me?', 'Feeling down today.'],
-  sick: ['I don\'t feel so good...', 'I need food and rest...'],
+  sick: ['I don\'t feel so good....', 'I need food and rest...'],
   rain: ['It\'s raining in Vancouver. Shocking.', 'Umbrella mode!'],
   snow: ['SNOW!!', 'Brr, it\'s snowing!'],
   late: ['It\'s late. Sleep is a feature, not a bug.', 'Bedtime? Your brain needs a reboot.'],

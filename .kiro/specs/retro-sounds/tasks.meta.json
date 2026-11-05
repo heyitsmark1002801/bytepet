@@ -1,0 +1,326 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Implement `SPECS`, `shouldPlay`, `specFor`, and `handleEvent` in `renderer/sounds.js`": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100466
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839106958
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839231483
+      }
+    ],
+    "1.2 Write property test: each sound event maps to its own beep spec": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100497
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839235055
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839461977
+      }
+    ],
+    "1.3 Write property test: all six beeps are mutually distinguishable": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100526
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839236443
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839463379
+      }
+    ],
+    "1.4 Write property test: every beep fits the duration window": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100552
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839237438
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839464317
+      }
+    ],
+    "1.5 Write property test: the play gate honors mapping, setting, quiet, and snapshot presence": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100581
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839238883
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839465760
+      }
+    ],
+    "2.1 Implement `playSpec` with the oscillator/gain envelope and interrupt-on-new-event": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100606
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839239607
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839466600
+      }
+    ],
+    "2.2 Write property test: playback never throws when Web Audio is unavailable": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100633
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839472692
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839822967
+      }
+    ],
+    "2.3 Write unit test: playback shape and interrupt behavior": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100658
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839474128
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839823913
+      }
+    ],
+    "3. Checkpoint - sound module and its tests pass": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100703
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839832535
+      }
+    ],
+    "4.1 Call `Sound.handleEvent` from `api.onEvent` in `renderer/renderer.js`": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100727
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839475073
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839638182
+      }
+    ],
+    "4.2 Write example test: non-sound events trigger no playback": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100750
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839647303
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839825316
+      }
+    ],
+    "5.1 Add the default, snapshot field, and persistence in `main.js`": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100775
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839476464
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839636032
+      }
+    ],
+    "5.2 Write unit tests: main settings default, load, snapshot, and persistence": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100802
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839648258
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839826295
+      }
+    ],
+    "6.1 Add `#t-sounds` to the setup HTML and wire it in `setup.js`": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100827
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839477326
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839637425
+      }
+    ],
+    "6.2 Write example test: setup toggle presence, reflection, and submission": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100852
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839649128
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839827708
+      }
+    ],
+    "7.1 Add the no-audio-files check and end-to-end gating smoke": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100877
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839646003
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839828839
+      }
+    ],
+    "8. Final checkpoint - ensure all tests pass": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839100902
+      },
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839835178
+      }
+    ],
+    "1. Create the sound module's pure decision layer": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839465795
+      }
+    ],
+    "2. Implement the Web Audio playback layer": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839823943
+      }
+    ],
+    "4. Wire the sound engine into the renderer": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839825346
+      }
+    ],
+    "5. Add the `sounds` setting in the main process": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839826356
+      }
+    ],
+    "6. Add the sounds toggle to the setup window": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839827750
+      }
+    ],
+    "7. Integration smoke and final wiring": [
+      {
+        "executionId": "aceedd06-8f77-4de9-9804-2399e353b5d2",
+        "chatSessionId": "sess_55008f46-097c-46b9-a052-6a45f09f6cd6",
+        "timestamp": 1793839828892
+      }
+    ]
+  }
+}

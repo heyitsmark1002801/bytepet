@@ -587,7 +587,10 @@ function placePoop(p) {
 }
 function stepPoops(dt) {
   for (const [, p] of poops) {
-    if (p.mode !== 'fall') continue;
+    // while held, the mouse sets x/y directly; just keep the DOM in sync each frame
+    if (p.mode === 'drag') { placePoop(p); continue; }
+    if (p.mode !== 'fall') { placePoop(p); continue; }
+    // gravity + integration — identical to the pet's fall physics
     p.vy += GRAVITY * dt;
     p.x += p.vx * dt;
     p.y += p.vy * dt;
@@ -603,22 +606,38 @@ function stepPoops(dt) {
     }
     if (p.y >= poopFloor()) {
       p.y = poopFloor();
-      if (Math.abs(p.vy) > 400) { p.vy = -p.vy * 0.35; p.vx *= 0.7; } else {
+      // same floor response as the pet: bounce when fast, settle with friction
+      if (Math.abs(p.vy) > 500) { p.vy = -p.vy * 0.35; p.vx *= 0.7; } else {
         p.vy = 0;
-        p.vx *= 0.8;
-        if (Math.abs(p.vx) < 20) { p.mode = 'rest'; p.hitPet = false; }
+        p.vx *= 0.82;
+        if (Math.abs(p.vx) < 25) { p.mode = 'rest'; p.hitPet = false; }
       }
     }
     placePoop(p);
   }
 }
-let poopPress = null; // { kind, sx, sy, ox, oy, moved, samples }
+// throw velocity from drag samples — uses only the last ~90ms so a flick on
+// release decides the throw, not the slow part of the drag. Shared by pet & poop.
+function throwVelocity(samples) {
+  if (!samples || samples.length < 2) return { vx: 0, vy: 0 };
+  const b = samples[samples.length - 1];
+  // walk back to the first sample within the recent window (but keep at least 2)
+  let i = samples.length - 2;
+  while (i > 0 && b.t - samples[i].t < 90) i--;
+  const a = samples[i];
+  const dt = Math.max(16, b.t - a.t) / 1000;
+  const clamp = (v) => Math.max(-2500, Math.min(2500, v));
+  return { vx: clamp((b.x - a.x) / dt), vy: clamp((b.y - a.y) / dt) };
+}
+
+let poopPress = null; // { kind, sx, sy, ox, oy, moved, samples } — grab & swing, same as the pet
 window.addEventListener('mousedown', (e) => {
   if (e.button !== 0 || overPet(e.clientX, e.clientY)) return;
   const kind = overPoop(e.clientX, e.clientY);
   if (!kind) return;
   const p = poops.get(kind);
-  if (p.justThrown || p.mode === 'fall') return; // that was a throw, not a click
+  // you can catch it mid-air and swing it again, just like grabbing the pet
+  p.vx = 0; p.vy = 0;
   poopPress = { kind, sx: e.clientX, sy: e.clientY, ox: e.clientX - p.x, oy: e.clientY - p.y, moved: false, samples: [{ x: e.clientX, y: e.clientY, t: now() }] };
 });
 window.addEventListener('mousemove', (e) => {
@@ -636,7 +655,7 @@ window.addEventListener('mousemove', (e) => {
     p.y = Math.min(poopFloor(), e.clientY - poopPress.oy);
     placePoop(p);
     poopPress.samples.push({ x: e.clientX, y: e.clientY, t: now() });
-    if (poopPress.samples.length > 6) poopPress.samples.shift();
+    if (poopPress.samples.length > 12) poopPress.samples.shift();
   }
 });
 window.addEventListener('mouseup', () => {
@@ -646,14 +665,11 @@ window.addEventListener('mouseup', () => {
   const p = poops.get(pp.kind);
   if (!p || !pp.moved) return; // a plain click: handled by the click handler (open the messy folder)
   p.el.classList.remove('held');
-  const a = pp.samples[0];
-  const b = pp.samples[pp.samples.length - 1];
-  const dt = Math.max(16, b.t - a.t) / 1000;
-  p.vx = Math.max(-2500, Math.min(2500, (b.x - a.x) / dt));
-  p.vy = Math.max(-2500, Math.min(2500, (b.y - a.y) / dt));
+  // throw velocity from the recent flick — exactly the same as the pet toss
+  const v = throwVelocity(pp.samples);
+  p.vx = v.vx;
+  p.vy = v.vy;
   p.mode = 'fall';
-  p.justThrown = true;
-  setTimeout(() => { p.justThrown = false; }, 50);
 });
 
 // ---------- toasts (top-right) ----------
@@ -891,7 +907,7 @@ window.addEventListener('mousemove', (e) => {
       body.x = e.clientX - press.ox;
       body.y = Math.min(floorY(), e.clientY - press.oy);
       press.samples.push({ x: e.clientX, y: e.clientY, t: now() });
-      if (press.samples.length > 6) press.samples.shift();
+      if (press.samples.length > 12) press.samples.shift();
     }
     return;
   }
@@ -969,11 +985,9 @@ window.addEventListener('mouseup', (e) => {
     if (petMood() !== 'sleeping') hearts(3);
     return;
   }
-  const a = p.samples[0];
-  const b = p.samples[p.samples.length - 1];
-  const dt = Math.max(16, b.t - a.t) / 1000;
-  body.vx = Math.max(-2500, Math.min(2500, (b.x - a.x) / dt));
-  body.vy = Math.max(-2500, Math.min(2500, (b.y - a.y) / dt));
+  const v = throwVelocity(p.samples);
+  body.vx = v.vx;
+  body.vy = v.vy;
   body.mode = petMood() === 'ghost' ? 'float' : 'fall';
   tossScored = false;
   hideBasketSoon(4500);

@@ -9,7 +9,8 @@
       "action": {
         "type": "agent",
         "prompt": "Check any new or changed lines are short (under 80 characters), friendly, and don't mention real brands. Suggest fixes."
-      }
+      },
+      "enabled": true
     }
   ]
 }
