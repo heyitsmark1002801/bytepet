@@ -19,7 +19,8 @@ const GH = require('./src/github');
 const Sync = require('./src/sync');
 const Reminders = require('./src/reminders');
 const Todoist = require('./src/todoist');
-const System = require('./src/system');
+const Platform = require('./src/platform');
+const System = Platform; // back-compat alias for existing System.* call sites
 const G = require('./src/progress');
 const ACH = require('./src/achievements');
 const Postcards = require('./src/postcards');
@@ -689,6 +690,10 @@ function dropOpenTasksFrom(source) {
 }
 
 // ---------- what's on screen right now (no permissions for apps; browsers ask once) ----------
+// All OS reads now go through the platform layer (Platform / System alias).
+// These stay as thin wrappers so the rest of main.js is unchanged.
+
+// Generic command runner, used for cross-platform tools like `git`.
 function run(cmd, args, opts = {}) {
   return new Promise((resolve) => {
     execFile(cmd, args, { timeout: 5000, ...opts }, (err, stdout, stderr) => resolve({ err, out: `${stdout || ''}\n${stderr || ''}` }));
@@ -699,89 +704,29 @@ async function getFrontApp() {
   return (await getFrontAppInfo()).name;
 }
 
-// Name, bundle path and Apple category of the app in front (no permissions needed).
-// Uses the same simple lsappinfo calls that worked in earlier versions.
-// App Store category + whether it's an invisible helper (read once per app, then cached)
-const appInfoCache = new Map();
-let frontDebug = null;
-async function appInfo(bundlePath) {
-  if (!bundlePath) return { category: null, agent: false };
-  if (!appInfoCache.has(bundlePath)) {
-    const plist = path.join(bundlePath, 'Contents', 'Info');
-    const read = async (key) => {
-      const r = await run('/usr/bin/defaults', ['read', plist, key], { timeout: 3000 });
-      return r.err ? null : r.out.trim();
-    };
-    const category = await read('LSApplicationCategoryType');
-    const ui = await read('LSUIElement');
-    const bg = await read('LSBackgroundOnly');
-    appInfoCache.set(bundlePath, { category: category || null, agent: ui === '1' || bg === '1' });
-  }
-  return appInfoCache.get(bundlePath);
-}
-async function appCategory(bundlePath) { return (await appInfo(bundlePath)).category; }
-// Ask macOS (NSWorkspace) which app is in front. No permission needed.
-const FRONT_SCRIPT = 'ObjC.import("AppKit"); const a = $.NSWorkspace.sharedWorkspace.frontmostApplication; '
-  + 'JSON.stringify({ name: a.localizedName.js, path: a.bundleURL ? a.bundleURL.path.js : null })';
-async function getFrontAppInfo() {
-  if (!IS_MAC) return { name: null };
-  let name = null;
-  let bundlePath = null;
-  const r = await run('/usr/bin/osascript', ['-l', 'JavaScript', '-e', FRONT_SCRIPT], { timeout: 4000 });
-  if (!r.err) {
-    try { const j = JSON.parse(r.out.trim().split('\n')[0]); name = j.name || null; bundlePath = j.path || null; } catch { /* fall back */ }
-  }
-  if (!name) {
-    // fallback: lsappinfo
-    const nameR = await run('/bin/sh', ['-c', 'lsappinfo info -only name "$(lsappinfo front)"']);
-    name = nameR.err ? null : ((nameR.out.match(/=\s*"([^"]+)"/) || [])[1] || null);
-    const pathR = await run('/bin/sh', ['-c', 'lsappinfo info -only bundlepath "$(lsappinfo front)"']);
-    bundlePath = pathR.err ? null : ((pathR.out.match(/=\s*"([^"]+)"/) || [])[1] || null);
-  }
-  frontDebug = { name, bundlePath, via: r.err ? 'lsappinfo' : 'NSWorkspace', error: r.err ? String(r.out).trim().slice(0, 200) : null };
-  const category = await appCategory(bundlePath);
-  // Is it Bytepet's own window (the Bytepet window, a game)? Then look past it.
-  const self = !!bundlePath && process.execPath.startsWith(bundlePath);
-  return { name, bundlePath, category, self };
-}
+// App Store category + whether it's an invisible helper (read once per app, then cached in the platform layer)
+async function appInfo(bundlePath) { return Platform.appInfo(bundlePath); }
+async function getFrontAppInfo() { return Platform.frontApp(); }
 
 const matches = (name, list) => !!name && (list || []).some((w) => name.toLowerCase() === String(w).toLowerCase());
 
-// Active tab's address and title (the title lets tutorials count as learning)
-const chromium = (n) => `tell application "${n}" to return (URL of active tab of front window) & linefeed & (title of active tab of front window)`;
-const safari = (n) => `tell application "${n}" to return (URL of front document) & linefeed & (name of front document)`;
-const BROWSERS = {
-  Safari: safari('Safari'),
-  'Safari Technology Preview': safari('Safari Technology Preview'),
-  'Google Chrome': chromium('Google Chrome'),
-  'Google Chrome Canary': chromium('Google Chrome Canary'),
-  Arc: chromium('Arc'),
-  'Brave Browser': chromium('Brave Browser'),
-  'Microsoft Edge': chromium('Microsoft Edge'),
-  Chromium: chromium('Chromium'),
-  Vivaldi: chromium('Vivaldi'),
-  Opera: chromium('Opera'),
-};
+// Which browsers we can read a tab from, and a per-browser status for the Focus/Setup UI.
+// The actual AppleScript lives in the platform layer; main.js just tracks status.
+const BROWSERS = Platform.BROWSERS || {};
 const browserDenied = {};
 const browserStatus = {}; // browser -> 'ok' | 'denied' | 'no window'
 
 async function getBrowserTab(appName) {
-  const script = BROWSERS[appName];
-  if (!script || (browserDenied[appName] || 0) > Date.now()) return null;
-  const r = await run('/usr/bin/osascript', ['-e', script], { timeout: 3000 });
-  if (r.err) {
-    // not allowed (or no window): don't ask again for 10 minutes
-    if (/-1743|not authori[sz]ed/i.test(r.out)) {
-      browserDenied[appName] = Date.now() + 10 * 60000;
-      browserStatus[appName] = 'denied';
-    } else browserStatus[appName] = 'no window';
-    return null;
+  if (!BROWSERS[appName] || (browserDenied[appName] || 0) > Date.now()) return null;
+  const tab = await Platform.activeTab(appName);
+  // Mirror the platform layer's per-browser status/back-off so the UI and the
+  // background scan behave exactly as before.
+  const st = Platform.browserState ? Platform.browserState() : null;
+  if (st) {
+    browserStatus[appName] = st.status[appName] || browserStatus[appName];
+    if (st.denied[appName]) browserDenied[appName] = st.denied[appName];
   }
-  browserStatus[appName] = 'ok';
-  const [url, ...rest] = r.out.trim().split('\n');
-  let site = null;
-  try { site = new URL(url.trim()).hostname.replace(/^www\./, ''); } catch { /* not a web page */ }
-  return { site, title: rest.join(' ').trim() || null };
+  return tab;
 }
 async function getBrowserSite(appName) {
   const t = await getBrowserTab(appName);
@@ -954,8 +899,7 @@ async function sample() {
         lastTemptCheck = Date.now();
         for (const name of settings.distractionApps || []) {
           if (name === c.appName) continue;
-          const r = await run('/usr/bin/pgrep', ['-x', name], { timeout: 2000 });
-          if (!r.err) { speak(say('tempted', { source: name })); break; }
+          if (await Platform.isRunning(name)) { speak(say('tempted', { source: name })); break; }
         }
       }
     }
@@ -1053,17 +997,16 @@ async function permissionChecks() {
   out.push({ id: 'notifications', label: 'Notifications', ok: Notification.isSupported() ? null : false, why: 'Press Test — you should see a hello from your pet.', fix: 'notifications' });
   return out;
 }
-const PANES = {
-  automation: 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation',
-  accessibility: 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility',
-  files: 'x-apple.systempreferences:com.apple.preference.security?Privacy_FilesAndFolders',
-  notifications: 'x-apple.systempreferences:com.apple.preference.notifications',
-};
+const PANES = Platform.permissionPanes || {};
 async function testPermission(id) {
   if (id.startsWith('browser')) {
     const name = id.split(':')[1];
     const list = name ? [name] : Object.keys(BROWSER_KIND);
-    for (const b of list) { browserDenied[b] = 0; await getBrowserTab(b).catch(() => null); }
+    for (const b of list) {
+      browserDenied[b] = 0;
+      if (Platform.clearBrowserDenied) Platform.clearBrowserDenied(b);
+      await getBrowserTab(b).catch(() => null);
+    }
     bgCache.tabsAt = 0;
   } else if (id === 'accessibility') {
     try { systemPreferences.isTrustedAccessibilityClient(true); } catch { /* not a Mac */ }
@@ -1157,14 +1100,7 @@ function endBreak(early = false) {
 // ---------- music: dance when Spotify / Music is playing ----------
 async function checkMusic() {
   if (demoMode) return;
-  if (!IS_MAC) return;
-  let playing = false;
-  for (const name of settings.musicApps || []) {
-    const { err } = await run('/usr/bin/pgrep', ['-x', name]);
-    if (err) continue;
-    const r = await run('/usr/bin/osascript', ['-e', `tell application "${name}" to player state as string`], { timeout: 3000 });
-    if (r.err || r.out.trim() === 'playing') { playing = true; break; }
-  }
+  const playing = await Platform.musicPlaying(settings.musicApps || []);
   if (playing !== music) {
     music = playing;
     if (music && !pet.asleep && !pet.sleepy && !pet.ghost) speak(say('dance'));
@@ -1173,31 +1109,14 @@ async function checkMusic() {
 }
 
 // ---------- medicine: software updates ----------
-async function countMacUpdates() {
-  const { err, out } = await run('/usr/sbin/softwareupdate', ['-l'], { timeout: 5 * 60000 });
-  if (/No new software available/i.test(out)) return [];
-  const items = [...out.matchAll(/^\s*\*\s*(?:Label:\s*)?(.+)$/gm)].map((m) => m[1].trim());
-  if (err && !items.length) return null;
-  return items;
-}
-
-async function countBrewUpdates() {
-  const brew = ['/opt/homebrew/bin/brew', '/usr/local/bin/brew'].find((p) => fs.existsSync(p));
-  if (!brew) return [];
-  const { err, out } = await run(brew, ['outdated', '--quiet'], { timeout: 2 * 60000 });
-  if (err) return null;
-  return out.split('\n').map((s) => s.trim()).filter(Boolean).map((n) => `Homebrew: ${n}`);
-}
-
 async function checkUpdates(manual = false) {
   if (demoMode) return;
-  if (!IS_MAC || updates.checking) return;
+  if (updates.checking) return;
   if (!settings.checkUpdates && !manual) return;
   updates.checking = true;
   updateTray();
   if (manual) speak('Checking for updates...');
-  const mac = await countMacUpdates();
-  const brew = settings.checkHomebrew ? await countBrewUpdates() : [];
+  const { mac, brew } = await Platform.pendingUpdates(settings);
   updates.checking = false;
   if (mac === null && brew === null) {
     updates.error = 'Could not check for updates';
@@ -1217,7 +1136,8 @@ async function checkUpdates(manual = false) {
 }
 
 function openSoftwareUpdate() {
-  shell.openExternal('x-apple.systempreferences:com.apple.preferences.softwareupdate');
+  const url = Platform.updateUrl();
+  if (url) shell.openExternal(url);
   medicineWatchUntil = Date.now() + 45 * 60000; // look often while you're installing
 }
 
@@ -1232,14 +1152,11 @@ let lastFrontWasFinder = false;
 let lastQuickCheck = 0;
 let lastFullSickCheck = 0;
 async function quickUpdateCount() {
-  const r = await run('/usr/bin/defaults', ['read', '/Library/Preferences/com.apple.SoftwareUpdate', 'LastRecommendedUpdatesAvailable'], { timeout: 5000 });
-  if (r.err) return null;
-  const n = parseInt(String(r.out).trim(), 10);
-  return Number.isFinite(n) ? n : null;
+  return Platform.quickUpdateCount ? Platform.quickUpdateCount() : null;
 }
 async function medicineTick() {
   if (demoMode) return;
-  if (!IS_MAC || !pet.needsMedicine || updates.checking) return;
+  if (!pet.needsMedicine || updates.checking) return;
   const now = Date.now();
   const watching = now < medicineWatchUntil;
   if (now - lastQuickCheck < (watching ? 20000 : 60000)) return;
@@ -1537,9 +1454,8 @@ function applyMess(piles) {
   pushState();
 }
 function openMess(kind) {
-  const home = require('os').homedir();
-  const dirs = { desktop: 'Desktop', downloads: 'Downloads', trash: '.Trash' };
-  if (dirs[kind]) shell.openPath(path.join(home, dirs[kind]));
+  const target = Platform.messFolderPath(kind);
+  if (target) shell.openPath(target);
   else if (kind === 'tabs') speak('Close some browser tabs to clean this one up!');
 }
 
