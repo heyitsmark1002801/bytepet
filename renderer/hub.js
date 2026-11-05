@@ -372,6 +372,7 @@
 
   // ---------- setup lives in its own window now ----------
   $('s-setup').addEventListener('click', () => api.setupAgain());
+  $('s-tour').addEventListener('click', () => { if (window.BytepetStartTour) window.BytepetStartTour(); });
   $('s-test-notify').addEventListener('click', async () => {
     const r = await api.testNotify();
     $('s-notify-status').textContent = !r.supported ? 'Notifications aren\'t supported here.'
@@ -425,6 +426,7 @@
     $('s-strict').checked = s.strictFocus;
     $('s-notify').checked = s.notifications;
     $('s-toasts').checked = s.toasts;
+    $('s-sounds').checked = s.sounds !== false;
     $('s-checkin').checked = s.morningCheckin;
     $('s-bed').value = s.bedtimeHour;
     $('s-wake').value = s.wakeHour;
@@ -467,6 +469,7 @@
       strictFocus: $('s-strict').checked,
       notifications: $('s-notify').checked,
       toasts: $('s-toasts').checked,
+      sounds: $('s-sounds').checked,
       morningCheckin: $('s-checkin').checked,
       bedtimeHour: $('s-bed').value,
       wakeHour: $('s-wake').value,

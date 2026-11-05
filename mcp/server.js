@@ -22,10 +22,13 @@ const PROTOCOL_VERSION = '2024-11-05';
 
 // ---------- feed-server client ----------
 
-// GET a path on the local feed server and parse the JSON (or plain text) reply.
-function request(pathname) {
+// Call a path on the local feed server and parse the JSON (or plain text) reply.
+// Read routes use GET; the state-mutating /task/done route requires POST, which
+// the feed server enforces (src/feed-guard.js). We never send an Origin header,
+// so the feed server's browser-origin guard lets these local calls through.
+function request(pathname, method = 'GET') {
   return new Promise((resolve, reject) => {
-    const req = http.get({ host: HOST, port: PORT, path: pathname, timeout: 4000 }, (res) => {
+    const req = http.request({ host: HOST, port: PORT, path: pathname, method, timeout: 4000 }, (res) => {
       let body = '';
       res.on('data', (c) => { body += c; });
       res.on('end', () => {
@@ -42,6 +45,7 @@ function request(pathname) {
         ? new Error('Could not reach Bytepet on 127.0.0.1:47777 — is the app running?')
         : e,
     ));
+    req.end();
   });
 }
 
@@ -87,7 +91,7 @@ async function callTool(name, args) {
   if (name === 'complete_task') {
     const id = args && args.id;
     if (!id) throw new Error('complete_task needs an "id" (get one from list_open_tasks).');
-    const r = await request(`/task/done?id=${encodeURIComponent(id)}`);
+    const r = await request(`/task/done?id=${encodeURIComponent(id)}`, 'POST');
     if (r && r.ok) return text(`Done: "${r.title}" (size ${r.size}). Your pet ate!`);
     throw new Error((r && r.error) || 'Could not complete that task.');
   }

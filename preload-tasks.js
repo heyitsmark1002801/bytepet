@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld('tasksApi', {
   syncNow: () => ipcRenderer.invoke('conn:sync-now'),
   onUpdate: (cb) => ipcRenderer.on('tasks:update', (_e, view) => cb(view)),
   onTab: (cb) => ipcRenderer.on('hub:tab', (_e, tab) => cb(tab)),
+  onOfferTour: (cb) => ipcRenderer.on('offer-tour', () => cb()),
   equip: (id) => ipcRenderer.invoke('hub:equip', id),
   vacation: (on) => ipcRenderer.invoke('hub:vacation', on),
   retire: () => ipcRenderer.invoke('hub:retire'),

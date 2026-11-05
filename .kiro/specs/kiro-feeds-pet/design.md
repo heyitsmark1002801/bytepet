@@ -6,8 +6,8 @@ This feature gives an AI agent a safe, on-device way to watch the pet and reward
 
 Three pieces:
 
-1. **Feed_Server routes** (`main.js`) — add `GET /tasks` (list open tasks) and `GET /task/done?id=` (complete one). These reuse the existing `T.openTasks()` and `completeTask()` functions, so an MCP completion behaves identically to clicking a task in the tray or Tasks window — same food, same XP, same cross-app tick-off.
-2. **MCP_Server** (`mcp/server.js`) — a standalone Node process speaking JSON-RPC 2.0 over stdio. It exposes three tools (`get_pet_status`, `list_open_tasks`, `complete_task`) that each make one `http.get` to the Feed_Server. No Electron, no dependencies, localhost only.
+1. **Feed_Server routes** (`main.js`) — add `GET /tasks` (list open tasks) and `POST /task/done?id=` (complete one). These reuse the existing `T.openTasks()` and `completeTask()` functions, so an MCP completion behaves identically to clicking a task in the tray or Tasks window — same food, same XP, same cross-app tick-off. A pure guard (`src/feed-guard.js`) runs first: it rejects any request with an `Origin` header (403) so no web page can reach the loopback port, and holds `/task/done` to POST only (405 otherwise) so a prefetchable GET can't trigger a completion.
+2. **MCP_Server** (`mcp/server.js`) — a standalone Node process speaking JSON-RPC 2.0 over stdio. It exposes three tools (`get_pet_status`, `list_open_tasks`, `complete_task`) that each make one localhost request to the Feed_Server (GET for reads, POST for `complete_task`). No Electron, no dependencies, localhost only, and no `Origin` header so the guard lets it through.
 3. **Green_Tests_Hook** (`.kiro/hooks/feed-pet-on-green-tests.json`) — a `command` hook on the `Stop` trigger that runs `npm test` and, on success, curls the Feed_Server's `/feed` route.
 
 ## Architecture
@@ -34,8 +34,9 @@ Key decisions and rationale:
 
 Added inside `startFeedServer()`'s request handler, after the existing `/status` branch:
 
+- Guard (all routes, runs first): any `Origin` header → `403 forbidden`; non-POST to `/task/done` → `405 method not allowed`.
 - `GET /tasks` → `200` JSON array: `[{ id, title, size, due, source }]` from `T.openTasks(tasks)`.
-- `GET /task/done?id=<id>`:
+- `POST /task/done?id=<id>`:
   - no `id` → `400 missing id`
   - unknown id → `404` `{ ok: false, error }`
   - open task → `completeTask(id)` then `200` `{ ok: true, id, title, size }`
@@ -45,15 +46,16 @@ Added inside `startFeedServer()`'s request handler, after the existing `/status`
 A Node stdio server. Reads newline-delimited JSON-RPC from stdin, writes responses to stdout.
 
 ```js
-// One http.get to the Feed_Server; JSON-parses the reply.
-function request(pathname) { /* resolves JSON or text; rejects with a friendly msg on ECONNREFUSED/timeout */ }
+// One http.request to the Feed_Server (GET for reads, POST for the mutating
+// route); JSON-parses the reply. Sends no Origin header so the guard allows it.
+function request(pathname, method = 'GET') { /* resolves JSON or text; friendly msg on ECONNREFUSED/timeout */ }
 
 const TOOLS = [ get_pet_status, list_open_tasks, complete_task ]; // names + JSON input schemas
 
 async function callTool(name, args) {
   // get_pet_status  -> request('/status')
   // list_open_tasks -> request('/tasks')
-  // complete_task   -> request('/task/done?id=' + id)
+  // complete_task   -> request('/task/done?id=' + id, 'POST')
 }
 ```
 
@@ -97,6 +99,6 @@ The two read-only tools are auto-approved; `complete_task` changes state, so it 
 
 ## Notes
 
-- No new logic lands in `src/`, so per the project's test rule there is nothing new to property-test there; the change is server plumbing plus an MCP adapter.
-- The `/task/done` route is a `GET` to match the existing `/feed` and `/status` style and to keep the git-hook/curl pattern consistent; it is localhost-only and completes an already-user-owned task, so it carries no cross-site risk.
+- The only new `src/` logic is the pure `feed-guard.js`, covered by `test/feed-server.test.js` (the guard's Origin/method rules plus an end-to-end server using the real guard).
+- The `/task/done` route is **POST only** and the server **rejects any request with an `Origin` header**, so a web page cannot reach the loopback port or trigger a completion via a prefetchable GET. `/feed` and `/status` stay GET so the existing git post-commit hook (a plain `curl`) keeps working, protected by the same Origin guard.
 - Because `complete_task` mutates state, it is intentionally excluded from `autoApprove`.

@@ -346,8 +346,8 @@ function tickMinute(pet, ctx = {}) {
   if (dirty) hurts.push(BALANCE.healthDirty);
   if (pet.flies) hurts.push(BALANCE.healthFlies);
   if (pet.messSick) hurts.push(BALANCE.healthMessSick);
-  if (pet.happiness < 20) hurts.push(BALANCE.healthJoyless);
-  if (pet.discipline < 20) hurts.push(BALANCE.healthUndisciplined);
+  if (pet.happiness < 20 && !pet.asleep) hurts.push(BALANCE.healthJoyless);
+  if (pet.discipline < 20 && !pet.asleep) hurts.push(BALANCE.healthUndisciplined);
   if (pet.distracted && !pet.asleep) hurts.push(BALANCE.healthDistracted);
   if (pet.sleepy && !pet.asleep && (pet.calls.sleepy || 0) > CALL_LIMITS.sleepy) hurts.push(BALANCE.healthIgnoredSleepy);
   if (hurts.length) pet.health = clamp(pet.health - hurts.reduce((a, b) => a + b, 0));

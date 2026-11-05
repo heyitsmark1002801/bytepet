@@ -231,6 +231,7 @@
       <h2>🔔 Notifications</h2>
       <label class="toggle"><input id="s-notify" type="checkbox" /> <span>Mac notifications (when your pet needs you)</span></label>
       <label class="toggle"><input id="s-toasts" type="checkbox" /> <span>Little pop-up cards on screen (badges, streaks, new items)</span></label>
+      <label class="toggle"><input id="s-sounds" type="checkbox" /> <span>Sound effects (little retro beeps when your pet needs you)</span></label>
       <label class="toggle"><input id="s-quiet-pet" type="checkbox" /> <span>Quiet pet: speech bubbles only for important things</span></label>
       <div class="three-col">
         <label class="field">Quiet from <input id="s-q-start" type="number" min="0" max="23" title="Hour, 0–23" /></label>
@@ -304,6 +305,7 @@
     <h2>🛟 Help</h2>
     <div class="row-left">
       <button type="button" id="s-setup">Run setup again</button>
+      <button type="button" id="s-tour">Replay the tour</button>
       <button type="button" id="s-debug">Copy debug info</button>
       <button type="button" id="s-log" class="ghost-btn">Open log file</button>
       <span id="s-debug-status" class="status"></span>
@@ -325,5 +327,7 @@
   <script src="sprites.js"></script>
   <script src="tasks.js"></script>
   <script src="hub.js"></script>
+  <script src="../src/tour.js"></script>
+  <script src="tour.js"></script>
 </body>
 </html>

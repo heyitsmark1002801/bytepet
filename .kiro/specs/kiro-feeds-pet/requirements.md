@@ -48,10 +48,21 @@ Everything stays on-device. The MCP_Server is a thin client over the existing Fe
 #### Acceptance Criteria
 
 1. THE Feed_Server SHALL answer a `GET /tasks` request with a JSON array of the current Open_Tasks, each carrying id, title, size, due and source.
-2. WHEN the Feed_Server receives `GET /task/done?id=<id>` for an Open_Task, THE Feed_Server SHALL complete that task through the same path the app uses and SHALL respond with a JSON object reporting success and the task's title and size.
-3. IF the Feed_Server receives `GET /task/done` with no `id`, THEN THE Feed_Server SHALL respond with HTTP 400.
-4. IF the Feed_Server receives `GET /task/done?id=<id>` for an id that matches no Open_Task, THEN THE Feed_Server SHALL respond with HTTP 404 and a JSON object reporting failure.
-5. THE Feed_Server SHALL continue to answer its existing `/feed` and `/status` routes unchanged.
+2. WHEN the Feed_Server receives `POST /task/done?id=<id>` for an Open_Task, THE Feed_Server SHALL complete that task through the same path the app uses and SHALL respond with a JSON object reporting success and the task's title and size.
+3. IF the Feed_Server receives `POST /task/done` with no `id`, THEN THE Feed_Server SHALL respond with HTTP 400.
+4. IF the Feed_Server receives `POST /task/done?id=<id>` for an id that matches no Open_Task, THEN THE Feed_Server SHALL respond with HTTP 404 and a JSON object reporting failure.
+5. IF the Feed_Server receives `/task/done` with any method other than POST, THEN THE Feed_Server SHALL respond with HTTP 405 (the mutating route is not reachable by a prefetchable GET).
+6. THE Feed_Server SHALL continue to answer its existing `/feed` and `/status` routes unchanged (both GET), so the installed git post-commit hook keeps working.
+
+### Requirement 6: Keep the Feed_Server unreachable from web pages
+
+**User Story:** As a privacy-conscious user, I want the local feed server to be callable only by on-device tools, so that no website can feed, drain or inspect my pet through the loopback port.
+
+#### Acceptance Criteria
+
+1. THE Feed_Server SHALL listen only on `127.0.0.1`, never on a public interface.
+2. IF the Feed_Server receives any request that carries an `Origin` header, THEN THE Feed_Server SHALL reject it with HTTP 403 before running any route (a browser always sends `Origin` on a cross-origin request; the local tools — git curl, the MCP server, the app — never do).
+3. THE MCP_Server and the git post-commit hook SHALL send no `Origin` header, so their on-device calls pass the guard.
 
 ### Requirement 4: Feed the pet when the test suite passes
 

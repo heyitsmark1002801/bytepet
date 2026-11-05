@@ -27,6 +27,7 @@ const Location = require('./src/location');
 const Dist = require('./src/distraction');
 const Quiet = require('./src/quiet');
 const Demo = require('./src/demo-script');
+const { guard: feedGuard } = require('./src/feed-guard');
 const { say, sayForApp } = require('./src/lines');
 
 // ---------- log file (for bug reports) ----------
@@ -1955,6 +1956,10 @@ async function updateWeather() {
 function startFeedServer() {
   const server = http.createServer((req, res) => {
     const u = new URL(req.url, 'http://localhost');
+    // Security guard: reject browser-origin requests and enforce POST on
+    // state-mutating routes before doing anything (see src/feed-guard.js).
+    const g = feedGuard({ method: req.method, pathname: u.pathname, hasOrigin: req.headers.origin != null });
+    if (!g.ok) { res.statusCode = g.status; return res.end(g.body); }
     if (u.pathname === '/feed') {
       const type = u.searchParams.get('type') || 'commit';
       const size = (u.searchParams.get('size') || 'M').toUpperCase();
@@ -2340,9 +2345,24 @@ function finishSetup(input) {
     if (win && !win.isDestroyed() && !settings.hidden) win.showInactive();
     send('reset', {});
     setTimeout(() => toast({ kind: 'unlock', emoji: '🥚', title: `Meet ${pet.name}!`, text: 'Your egg hatches in a few seconds. Click it to say hi.' }), 800);
+    // Open the Hub and offer the guided tour once the setup window has closed.
+    setTimeout(offerTour, 700);
   }
   logLine(first ? 'setup finished: egg placed' : 'setup updated');
   pushState();
+}
+
+// Open the Tasks/Hub window and ask the renderer to show the "Would you like a
+// demo?" card. We wait for the window's contents to finish loading so the offer
+// isn't sent before the renderer has registered its listener.
+function offerTour() {
+  if (process.env.BYTEPET_NO_TOUR) return;
+  openTasksWindow('tasks');
+  if (!tasksWin || tasksWin.isDestroyed()) return;
+  const wc = tasksWin.webContents;
+  const send = () => { if (tasksWin && !tasksWin.isDestroyed()) tasksWin.webContents.send('offer-tour'); };
+  if (wc.isLoading()) wc.once('did-finish-load', () => setTimeout(send, 250));
+  else setTimeout(send, 250);
 }
 
 // ---------- menu bar ----------

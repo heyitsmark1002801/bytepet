@@ -21,19 +21,46 @@ Grab the latest build from the [GitHub release](../../releases/latest):
 
 1. **Download** the `Bytepet-mac.zip` from the release and unzip it.
 2. **Drag** `Bytepet.app` into your **Applications** folder.
-3. The first launch, **right-click the app → Open** (it's not notarized, so a plain double-click is blocked by Gatekeeper). Confirm **Open** in the dialog. After that it opens normally.
+3. The first launch, **right-click the app → Open**, then confirm **Open** in the dialog (it's not notarized, so a plain double-click is blocked by Gatekeeper). On newer macOS (Sequoia and later) the dialog may not offer an Open button — instead go to **System Settings → Privacy & Security**, scroll down to the "Bytepet was blocked" message and click **Open Anyway**, then launch it again. After this one-time step it opens normally.
 
 Your egg appears at the bottom-right of your screen and hatches a few seconds later. Prefer to run from source? See **Run it** below.
 
-## Built with Kiro
+## How I used Kiro
 
-Bytepet was designed and built with Kiro's spec-driven workflow:
+Bytepet was designed and built with Kiro's spec-driven workflow. Every part of the
+`.kiro/` folder is committed so you can see exactly how it was made:
 
-- **[Specs](.kiro/specs)** — requirements → design → tasks for each feature (`demo-mode`, `retro-sounds`, `sleep-health-decay`, `kiro-feeds-pet`…).
-- **[Hooks](.kiro/hooks)** — automation that runs the tests on every `src/` save, keeps the README in sync with settings, reviews new pet lines, and feeds the pet when the test suite passes.
-- **[MCP server](mcp/server.js)** — Kiro can watch your pet and reward real work through an on-device Model Context Protocol server (see **Kiro can feed your pet** below).
-- **[Steering](.kiro/steering)** — the product, tech and art guidance Kiro follows on every change.
-- **[Property-based tests](test/pet-state.test.js)** — [fast-check](https://github.com/dubzzz/fast-check) properties prove the care rules hold across random inputs (meters stay in 0–100, a sleeping pet can't die, cures always heal, and more), alongside [`test/demo-script.test.js`](test/demo-script.test.js) and [`test/sounds.test.js`](test/sounds.test.js). Run them with `npm test`.
+- **[Steering](.kiro/steering)** — the guidance Kiro follows on every change:
+  [`product.md`](.kiro/steering/product.md) (the five meters and how they interlock),
+  [`tech.md`](.kiro/steering/tech.md) (pure logic in `src/`, Electron only in `main.js`,
+  a test for every `src/` change), and [`art.md`](.kiro/steering/art.md) (the monochrome
+  LCD pixel-art rules).
+- **[Feature specs](.kiro/specs)** — requirements → design → tasks for each feature:
+  [`demo-mode`](.kiro/specs/demo-mode), [`retro-sounds`](.kiro/specs/retro-sounds),
+  [`kiro-feeds-pet`](.kiro/specs/kiro-feeds-pet) (the MCP + feed server) and
+  [`first-run-tour`](.kiro/specs/first-run-tour).
+- **[Bugfix spec](.kiro/specs/sleep-health-decay-fix)** — a property test caught that a
+  sleeping pet could still lose health from low joy or low discipline and "die in its
+  sleep". The [`sleep-health-decay-fix`](.kiro/specs/sleep-health-decay-fix/bugfix.md)
+  bugfix spec drove the one-line guard (`&& !pet.asleep`) and the tightened property test
+  that now exercises happiness and discipline across the full 0–100 range.
+- **[Hooks](.kiro/hooks)** — automation that runs the tests on every `src/` save
+  ([`tests-on-src-save`](.kiro/hooks/tests-on-src-save.json)), keeps the README in sync
+  with settings ([`settings-readme-sync`](.kiro/hooks/settings-readme-sync.json)), reviews
+  new pet lines ([`lines-copy-review`](.kiro/hooks/lines-copy-review.json)), and feeds the
+  pet when the suite passes ([`feed-pet-on-green-tests`](.kiro/hooks/feed-pet-on-green-tests.json)).
+- **[The `pet-writer` agent](.kiro/agents/pet-writer.md)** — a custom Kiro agent that owns
+  the pet's voice. It writes and edits the speech lines in [`src/lines.js`](src/lines.js),
+  keeping them short (under 80 chars), warm, cheeky and brand-free, and runs the tests
+  afterward.
+- **[MCP server](mcp/server.js)** — Kiro can watch your pet and reward real work through an
+  on-device Model Context Protocol server (see **Kiro can feed your pet** below).
+- **[Property-based tests](test/pet-state.test.js)** — [fast-check](https://github.com/dubzzz/fast-check)
+  properties prove the care rules hold across random inputs (meters stay in 0–100, a
+  sleeping pet can't die in its sleep, cures always heal, and more), alongside
+  [`test/demo-script.test.js`](test/demo-script.test.js), [`test/sounds.test.js`](test/sounds.test.js),
+  [`test/tour.test.js`](test/tour.test.js) and [`test/feed-server.test.js`](test/feed-server.test.js).
+  Run them with `npm test`.
 - **[KIRO_LOG.md](KIRO_LOG.md)** — the running log of how the project was built with Kiro.
 
 ### Kiro can feed your pet 🍙
@@ -393,14 +420,16 @@ Menu → **Open settings file**, edit, then **Reload settings**.
 Bytepet listens on your Mac only (`127.0.0.1:47777`):
 
 ```bash
-curl "http://127.0.0.1:47777/feed?type=task&size=L"   # reward a large task
+curl "http://127.0.0.1:47777/feed?type=task&size=L"      # reward a large task
 curl "http://127.0.0.1:47777/feed?type=commit"
 curl "http://127.0.0.1:47777/status"
-curl "http://127.0.0.1:47777/tasks"                   # list open tasks (id, title, size, due)
-curl "http://127.0.0.1:47777/task/done?id=<id>"       # finish a task by id (feeds the pet)
+curl "http://127.0.0.1:47777/tasks"                      # list open tasks (id, title, size, due)
+curl -X POST "http://127.0.0.1:47777/task/done?id=<id>"  # finish a task by id (feeds the pet) — POST only
 ```
 
-The same endpoints power the [Kiro MCP server](mcp/server.js) — see **Kiro can feed your pet** above.
+The server rejects any request that carries an `Origin` header, so a web page can't reach it, and
+`/task/done` only answers `POST`. The same endpoints power the [Kiro MCP server](mcp/server.js) —
+see **Kiro can feed your pet** above.
 
 ## Privacy
 

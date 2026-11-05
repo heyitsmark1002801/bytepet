@@ -231,6 +231,19 @@ test('playSpec stops the previous oscillator before starting a new beep (interru
   }
 });
 
+// Example test: inherited Object.prototype keys are never mistaken for specs.
+// specFor/shouldPlay/handleEvent all gate on an own-property check, so keys like
+// "toString" or "constructor" have no spec and never play (R2.8).
+test('prototype keys like toString are not sound events', () => {
+  const protoKeys = ['toString', 'constructor', 'hasOwnProperty', 'valueOf', '__proto__', 'isPrototypeOf', 'propertyIsEnumerable'];
+  const snapshot = { sounds: true, quiet: false };
+  for (const key of protoKeys) {
+    assert.equal(Sounds.specFor(key), null, `specFor(${JSON.stringify(key)}) must be null`);
+    assert.equal(Sounds.shouldPlay(key, snapshot), false, `shouldPlay(${JSON.stringify(key)}) must be false`);
+    assert.equal(Sounds.handleEvent(key, snapshot), false, `handleEvent(${JSON.stringify(key)}) must be false`);
+  }
+});
+
 // Example test: non-sound events trigger no playback (R2.8).
 test('non-sound events return false and play no beep', () => {
   const snapshot = { sounds: true, quiet: false };

@@ -946,11 +946,12 @@ test('all five meters stay between 0 and 100 after any random sequence', () => {
 // (locked, or idle >= 5 min) puts the pet to sleep; while asleep it only sips
 // hunger (hungerAway, 0.08/min) and tops up energy, so sleep itself does no
 // health damage. Over a long away stretch it must never become a ghost.
-// Scoped to a pet that isn't already in a health-draining state when it goes to
-// bed: joy and discipline above their damage thresholds, not sick or dirty, and
-// not already starving. (tickMinute still applies joyless/undisciplined/sick/
-// dirty damage even while asleep — a pet sent to bed already failing is a
-// different case, and catchUp, not tickMinute, is what floors overnight health.)
+// The happiness and discipline generators now span the full 0..100 range: a
+// sleeping pet that is neither starving nor sick nor dirty must survive the
+// whole away stretch no matter how low its joy or discipline, because the
+// joyless and undisciplined penalties are guarded by !pet.asleep (the hard
+// problems — starving, sick, dirty/flies/mess — are excluded by the generators
+// below). This is the restored, bug-catching form of the test.
 test('a pet cannot die while asleep with the computer away', () => {
   fc.assert(
     fc.property(
@@ -960,9 +961,9 @@ test('a pet cannot die while asleep with the computer away', () => {
         // that sleep itself doesn't kill it, not re-testing starvation.
         hunger: fc.integer({ min: 80, max: 100 }),
         energy: fc.integer({ min: 0, max: 100 }),
-        happiness: fc.integer({ min: 20, max: 100 }),
+        happiness: fc.integer({ min: 0, max: 100 }),
         health: fc.integer({ min: 1, max: 100 }),
-        discipline: fc.integer({ min: 20, max: 100 }),
+        discipline: fc.integer({ min: 0, max: 100 }),
         minutes: fc.integer({ min: 1, max: 16 * 60 }),
         night: fc.boolean(),
       }),

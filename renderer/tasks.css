@@ -498,3 +498,78 @@ details.more { padding: 6px 12px; border-style: solid; }
 .week .stack, .stack { border: 1px solid var(--line) !important; background: #fff; }
 details#connections { border-top: 1px solid var(--line); }
 #f-break button, .row-left > button:not(.primary):not(.small-btn) { border-width: 1px; }
+
+/* ----------------------------------------------------------------------------
+   Guided tour: the post-setup walkthrough overlay (src/tour.js + renderer/tour.js)
+   A dimmed window with a clear "spotlight" over the element each stop points at,
+   a highlight ring, and a floating bubble that explains it. Plus the first-run
+   "Would you like a demo?" offer card.
+---------------------------------------------------------------------------- */
+body.tour-open { overflow: hidden; }
+
+#tour { position: fixed; inset: 0; z-index: 9000; }
+
+/* Four dim panels arranged around the spotlight hole (sized inline by JS). */
+.tour-dim {
+  position: fixed;
+  background: rgba(18, 22, 14, .62);
+  z-index: 9001;
+  cursor: pointer;
+}
+
+/* The ring around the highlighted element. pointer-events:none so it never
+   blocks the real control underneath (clicks still fall through the hole). */
+.tour-ring {
+  position: fixed;
+  z-index: 9002;
+  border: 3px solid var(--ink);
+  outline: 3px solid var(--lcd);
+  box-shadow: 0 0 0 3px var(--ink), 0 0 0 9px rgba(232, 238, 210, .5);
+  pointer-events: none;
+  transition: top .18s ease, left .18s ease, width .18s ease, height .18s ease;
+}
+
+.tour-bubble {
+  position: fixed;
+  z-index: 9003;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  padding: 14px 16px 12px;
+  background: var(--lcd);
+  border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--shadow);
+  transition: top .18s ease, left .18s ease;
+}
+.tour-bubble.centered { width: 340px; }
+.tour-step { font-size: 10.5px; letter-spacing: .5px; text-transform: uppercase; opacity: .6; margin-bottom: 4px; }
+.tour-h { font-size: 15px; margin: 0 0 6px; text-transform: none; letter-spacing: 0; }
+.tour-body { margin: 0 0 12px; font-size: 12.5px; line-height: 1.45; }
+.tour-actions { display: flex; align-items: center; gap: 8px; }
+.tour-actions .tour-spacer { flex: 1; }
+.tour-actions .tour-skip { opacity: .7; padding-left: 0; padding-right: 0; }
+.tour-actions button { padding: 5px 12px; }
+
+/* First-run "Would you like a demo?" offer. */
+#tour-offer {
+  position: fixed; inset: 0; z-index: 9100;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(18, 22, 14, .55);
+  padding: 20px;
+}
+.tour-offer-card {
+  width: 360px; max-width: 100%;
+  padding: 22px 22px 18px;
+  text-align: center;
+  background: var(--lcd);
+  border: 3px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--shadow);
+}
+.tour-offer-egg { font-size: 44px; line-height: 1; margin-bottom: 6px; }
+.tour-offer-card h2 { font-size: 16px; margin: 0 0 8px; text-transform: none; letter-spacing: 0; }
+.tour-offer-card p { margin: 0 0 16px; font-size: 12.5px; line-height: 1.5; opacity: .85; }
+.tour-offer-actions { display: flex; gap: 10px; justify-content: center; }
+.tour-offer-actions button { padding: 7px 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-ring, .tour-bubble { transition: none; }
+}
