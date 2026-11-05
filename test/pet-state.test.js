@@ -1,5 +1,6 @@
 // Run with: npm test
 const assert = require('assert');
+const fc = require('fast-check');
 const P = require('../src/pet-state');
 const T = require('../src/tasks');
 const C = require('../src/calendar');
@@ -884,6 +885,217 @@ test('3 days of random life never breaks the pet (meters stay 0–100, no NaN)',
     P.mood(p);
     P.needs(p);
   }
+});
+
+console.log('Pet-state properties (fast-check)');
+
+const METERS = ['hunger', 'energy', 'happiness', 'health', 'discipline'];
+const inRange = (p, where) => {
+  for (const k of METERS) assert.ok(Number.isFinite(p[k]) && p[k] >= 0 && p[k] <= 100, `${k} = ${p[k]} ${where}`);
+};
+
+// Property 1: after any random sequence of minutes and actions, all five meters
+// stay between 0 and 100 (and never go NaN). This drives tickMinute plus the
+// mutating care actions with generator-chosen inputs, and checks the invariant
+// after every single step, not just at the end.
+test('all five meters stay between 0 and 100 after any random sequence', () => {
+  // One "move" is an arbitrary minute-tick context or a care action.
+  const ctxArb = fc.record({
+    kind: fc.constant('tick'),
+    idleSeconds: fc.integer({ min: 0, max: 900 }),
+    locked: fc.boolean(),
+    working: fc.boolean(),
+    distracting: fc.boolean(),
+    music: fc.boolean(),
+    night: fc.boolean(),
+    charging: fc.boolean(),
+    screenLimit: fc.integer({ min: 30, max: 300 }),
+    distractionAllowance: fc.integer({ min: 0, max: 120 }),
+  });
+  const actionArb = fc.record({
+    kind: fc.constantFrom('feed', 'pet', 'play', 'basket', 'updates', 'mess', 'deadline', 'plan'),
+    food: fc.constantFrom('task-S', 'task-M', 'task-L', 'commit', 'focus-session', 'focus'),
+    updates: fc.integer({ min: 0, max: 4 }),
+    dirty: fc.boolean(),
+  });
+  fc.assert(
+    fc.property(fc.array(fc.oneof(ctxArb, actionArb), { minLength: 1, maxLength: 300 }), (moves) => {
+      const p = baby();
+      let now = Date.now();
+      inRange(p, 'at start');
+      for (const m of moves) {
+        if (m.kind === 'tick') {
+          now += 60000;
+          P.tickMinute(p, { ...m, distractionSource: 'youtube.com', now });
+        } else if (m.kind === 'feed') P.feed(p, m.food);
+        else if (m.kind === 'pet') P.petIt(p);
+        else if (m.kind === 'play') P.play(p);
+        else if (m.kind === 'basket') P.basket(p);
+        else if (m.kind === 'updates') P.setUpdates(p, m.updates);
+        else if (m.kind === 'mess') P.setMess(p, m.dirty ? [{ kind: 'downloads', count: 80, limit: 50 }] : []);
+        else if (m.kind === 'deadline') P.missedDeadline(p);
+        else if (m.kind === 'plan') { P.planDay(p); P.planDone(p); }
+        inRange(p, `after ${m.kind}`);
+      }
+    }),
+    { numRuns: 300 },
+  );
+});
+
+// Property 2: a pet can't die while asleep with the computer away. Being away
+// (locked, or idle >= 5 min) puts the pet to sleep; while asleep it only sips
+// hunger (hungerAway, 0.08/min) and tops up energy, so sleep itself does no
+// health damage. Over a long away stretch it must never become a ghost.
+// Scoped to a pet that isn't already in a health-draining state when it goes to
+// bed: joy and discipline above their damage thresholds, not sick or dirty, and
+// not already starving. (tickMinute still applies joyless/undisciplined/sick/
+// dirty damage even while asleep — a pet sent to bed already failing is a
+// different case, and catchUp, not tickMinute, is what floors overnight health.)
+test('a pet cannot die while asleep with the computer away', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        // Hunger starts high enough that 0.08/min of sleep-drain can't reach 0
+        // within the longest run (16h * 0.08 ~= 77 points), so we're testing
+        // that sleep itself doesn't kill it, not re-testing starvation.
+        hunger: fc.integer({ min: 80, max: 100 }),
+        energy: fc.integer({ min: 0, max: 100 }),
+        happiness: fc.integer({ min: 20, max: 100 }),
+        health: fc.integer({ min: 1, max: 100 }),
+        discipline: fc.integer({ min: 20, max: 100 }),
+        minutes: fc.integer({ min: 1, max: 16 * 60 }),
+        night: fc.boolean(),
+      }),
+      ({ hunger, energy, happiness, health, discipline, minutes, night }) => {
+        const p = baby();
+        Object.assign(p, { hunger, energy, happiness, health, discipline });
+        let now = Date.now();
+        // Wake hour kept far in the future so a night sleep doesn't end mid-run;
+        // the point is that an away pet is asleep and can't die, not when it wakes.
+        const wakeAt = now + 7 * 24 * 3600e3;
+        P.tickMinute(p, { locked: true, night, wakeAt, now: (now += 60000) });
+        assert.equal(p.asleep, true, 'away pet should be asleep');
+        for (let i = 1; i < minutes; i += 1) {
+          P.tickMinute(p, { locked: true, night, wakeAt, now: (now += 60000) });
+          assert.equal(p.ghost, false, `died while asleep after ${i + 1} min`);
+        }
+        assert.equal(p.ghost, false);
+        inRange(p, 'after sleeping away');
+      },
+    ),
+    { numRuns: 200 },
+  );
+});
+
+// Property 3: curing updates always raises health. For any pet that currently
+// needs medicine, setUpdates(pet, 0) emits 'cured' and must leave health no
+// lower than before — strictly higher unless it was already at the 100 ceiling.
+test('curing updates always raises health', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        health: fc.integer({ min: 0, max: 100 }),
+        happiness: fc.integer({ min: 0, max: 100 }),
+        pending: fc.integer({ min: 1, max: 5 }),
+      }),
+      ({ health, happiness, pending }) => {
+        const p = baby();
+        p.health = health;
+        p.happiness = happiness;
+        P.setUpdates(p, pending); // now sick
+        assert.equal(p.needsMedicine, true);
+        const before = p.health;
+        const ev = P.setUpdates(p, 0); // cure
+        assert.ok(ev.includes('cured'));
+        assert.ok(p.health >= before, `health dropped: ${before} -> ${p.health}`);
+        if (before < 100) assert.ok(p.health > before, `health did not rise: ${before} -> ${p.health}`);
+        inRange(p, 'after cure');
+      },
+    ),
+    { numRuns: 200 },
+  );
+});
+
+// Property 4: cleaning up always removes flies. Whatever the mess/flies/sick
+// state, calling setMess(pet, []) clears the piles and the flies, every time.
+test('cleaning up always removes flies', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        flies: fc.boolean(),
+        messSick: fc.boolean(),
+        messMinutes: fc.integer({ min: 0, max: 500 }),
+        piles: fc.array(fc.constantFrom('downloads', 'desktop', 'tabs', 'trash'), { minLength: 0, maxLength: 4 }),
+      }),
+      ({ flies, messSick, messMinutes, piles }) => {
+        const p = baby();
+        p.poop = piles.map((kind) => ({ kind, count: 80, limit: 50 }));
+        p.flies = flies;
+        p.messSick = messSick;
+        p.messMinutes = messMinutes;
+        P.setMess(p, []);
+        assert.ok(!p.flies, 'flies should be gone');
+        assert.equal(p.poop.length, 0, 'mess should be empty');
+        assert.equal(p.messMinutes, 0);
+        assert.equal(p.messSick, false);
+      },
+    ),
+    { numRuns: 200 },
+  );
+});
+
+// Property 5: finishing all planned tasks gives the bonus exactly once. This
+// mirrors main.js's checkPlanDone guard (a per-day `bonus` flag + every planned
+// task done) around the pure P.planDone reward, and runs it repeatedly. The
+// 'plan-done' bonus must fire exactly once no matter how many times completion
+// is re-checked.
+test('finishing all planned tasks gives the bonus exactly once', () => {
+  fc.assert(
+    fc.property(
+      fc.record({
+        count: fc.integer({ min: 1, max: 3 }),
+        rechecks: fc.integer({ min: 1, max: 8 }),
+        sizes: fc.array(fc.constantFrom('S', 'M', 'L'), { minLength: 3, maxLength: 3 }),
+      }),
+      ({ count, rechecks, sizes }) => {
+        const p = baby();
+        let now = 1_000_000;
+        const tasks = [];
+        const planned = [];
+        for (let i = 0; i < count; i += 1) {
+          const t = T.createTask({ title: `task ${i}`, size: sizes[i] }, now);
+          tasks.push(t);
+          planned.push(t.id);
+          now += 1;
+        }
+        const checkin = { ids: planned, bonus: false };
+        // Same guard as main.js checkPlanDone: fire the bonus once, only when
+        // the plan exists, isn't already bonused, and every planned task is done.
+        const checkPlanDone = () => {
+          if (!checkin || checkin.bonus || !checkin.ids.length) return [];
+          const open = checkin.ids.map((id) => tasks.find((x) => x.id === id)).filter((t) => t && !t.dismissed);
+          if (!open.length || !open.every((t) => t.done)) return [];
+          checkin.bonus = true;
+          return P.planDone(p);
+        };
+        let bonuses = 0;
+        // Complete the planned tasks one at a time, re-checking after each; a
+        // partially-done plan must not pay out early.
+        for (const id of planned) {
+          T.complete(tasks, id, (now += 1));
+          const done = planned.every((pid) => tasks.find((t) => t.id === pid).done);
+          const ev = checkPlanDone();
+          bonuses += ev.filter((e) => e === 'plan-done').length;
+          if (!done) assert.equal(ev.length, 0, 'no bonus before the whole plan is done');
+        }
+        // Re-check many more times: still exactly one payout.
+        for (let i = 0; i < rechecks; i += 1) bonuses += checkPlanDone().filter((e) => e === 'plan-done').length;
+        assert.equal(bonuses, 1, `bonus paid ${bonuses} times`);
+        inRange(p, 'after plan-done');
+      },
+    ),
+    { numRuns: 200 },
+  );
 });
 
 console.log(`\n${passed} tests passed`);
