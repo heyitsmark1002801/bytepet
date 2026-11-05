@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Review lines.js copy",
+      "trigger": "PostFileSave",
+      "description": "Reviews new or changed copy in src/lines.js for length, tone, and brand mentions.",
+      "matcher": "src/lines\\.js$",
+      "action": {
+        "type": "agent",
+        "prompt": "Check any new or changed lines are short (under 80 characters), friendly, and don't mention real brands. Suggest fixes."
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run tests on src save",
+      "trigger": "PostFileSave",
+      "description": "Runs npm test when any file in src/ is saved and fixes failing tests.",
+      "matcher": "src/.*",
+      "action": {
+        "type": "agent",
+        "prompt": "Run npm test. If anything fails, fix the code so the tests pass."
+      }
+    }
+  ]
+}

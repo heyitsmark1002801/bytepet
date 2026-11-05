@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Sync settings to README",
+      "trigger": "PostFileSave",
+      "description": "Keeps the README Settings section in sync when settings change in main.js.",
+      "matcher": "main\\.js$",
+      "action": {
+        "type": "agent",
+        "prompt": "If any settings were added or changed, update the Settings section in README.md to match."
+      }
+    }
+  ]
+}
